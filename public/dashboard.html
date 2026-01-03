@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            display: block;
+            background-color: #2c3e50;
+        }
+
+        .dashboard-header {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .dashboard-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .btn-edit {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-promote {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-demote {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        #productForm {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        #productForm .form-group {
+            flex: 1 1 200px;
+        }
+
+        #productForm .fullwidth {
+            flex-basis: 100%;
+        }
+
+        .alert {
+            display: none;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="dashboard-header">
+        <h1>Bytes Vault Admin</h1>
+        <button id="logoutBtn" class="btn btn-small" style="background: #dc3545; color: white;">Logout</button>
+    </header>
+
+    <div class="dashboard-content">
+        <div id="alertBox" class="alert"></div>
+
+        <!-- Product Management -->
+        <div class="card">
+            <h2 id="formTitle">Add New Product</h2>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" id="productStock" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="productDescription">
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="productImage">
+                </div>
+                <div class="form-group fullwidth">
+                    <button type="submit" class="btn">Save Product</button>
+                    <button type="button" id="cancelEdit" class="btn"
+                        style="background:#6c757d; display:none;">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Product Inventory</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Admin Management (Super Admin Only) -->
+        <div class="card" id="adminManagementSection" style="display:none;">
+            <h2>Admin Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Dept</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- User Management -->
+        <div class="card" id="userManagementSection" style="display:none;">
+            <h2>User Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
