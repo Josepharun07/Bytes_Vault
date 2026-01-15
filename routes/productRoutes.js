@@ -4,8 +4,11 @@ const {
     getProducts,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    addReview,
 } = require('../controllers/productController');
+const upload = require('../middleware/upload');
+
 
 const { verifyAuthenticationToken, authorizeAdmin } = require('../middleware/authMiddleware');
 
@@ -16,8 +19,9 @@ router.get('/', getProducts);
 router.use(verifyAuthenticationToken);
 router.use(authorizeAdmin);
 
-router.post('/', createProduct);
+router.post('/', upload.single('image'), createProduct);
 router.put('/:id', updateProduct);
 router.delete('/:id', deleteProduct);
+router.post('/:id/review', addReview);
 
 module.exports = router;

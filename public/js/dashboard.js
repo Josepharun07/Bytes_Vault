@@ -5,7 +5,7 @@ const productForm = document.getElementById('productForm');
 const cancelEdit = document.getElementById('cancelEdit');
 const formTitle = document.getElementById('formTitle');
 
-// Redirect if no token
+//Redirect if there is no token
 if (!token) {
     window.location.href = 'login.html';
 }
@@ -60,34 +60,42 @@ function renderProducts(products) {
 
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('productId').value;
-    const payload = {
-        name: document.getElementById('productName').value,
-        price: parseFloat(document.getElementById('productPrice').value),
-        stock: parseInt(document.getElementById('productStock').value),
-        description: document.getElementById('productDescription').value,
-        imageUrl: document.getElementById('productImage').value
-    };
 
-    const url = id ? `/api/products/${id}` : '/api/products';
-    const method = id ? 'PUT' : 'POST';
+    if (!token) {
+        alert('Admin login required');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', document.getElementById('productName').value);
+    formData.append('price', document.getElementById('productPrice').value);
+    formData.append('stock', document.getElementById('productStock').value);
+    formData.append('description', document.getElementById('productDescription').value);
+    formData.append('image', document.getElementById('productImage').files[0]);
 
     try {
-        const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(payload)
+        const res = await fetch('/api/products', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
         });
+
         const data = await res.json();
+
         if (data.success) {
-            showAlert(id ? 'Product updated!' : 'Product created!', 'success');
-            resetForm();
+            alert('Product added successfully');
+            productForm.reset();
             fetchProducts();
         } else {
-            showAlert(data.message);
+            alert(data.message);
         }
-    } catch (err) { showAlert('Operation failed'); }
+    } catch (err) {
+        alert('Failed to add product');
+    }
 });
+
 
 window.editProduct = (id, name, price, stock, desc, img) => {
     document.getElementById('productId').value = id;
