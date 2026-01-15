@@ -63,13 +63,15 @@ exports.fetchCatalog = async (req, res) => {
         const { category, search } = req.query;
         let query = {};
 
-        // Filter by Category
-        if (category) {
+        // Filter by Category (Exact Match)
+        // Only apply if category is not "All" or empty
+        if (category && category !== 'All') {
             query.category = category;
         }
 
-        // Search by Name (Case insensitive regex)
-        if (search) {
+        // Search by Name (Partial Match, Case Insensitive)
+        if (search && search.trim() !== '') {
+            // "i" means case-insensitive (finds "gpu" inside "Nvidia GPU")
             query.itemName = { $regex: search, $options: 'i' };
         }
 
@@ -85,6 +87,7 @@ exports.fetchCatalog = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
 
 // @desc    Delete product
 // @route   DELETE /api/products/:id

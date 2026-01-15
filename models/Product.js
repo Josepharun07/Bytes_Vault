@@ -27,7 +27,7 @@ const catalogItemSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ['GPU', 'CPU', 'Laptop', 'Peripheral', 'Console', 'Other']
+enum: ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software']
     },
     description: {
         type: String,

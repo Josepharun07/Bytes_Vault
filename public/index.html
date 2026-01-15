@@ -1,0 +1,39 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bytes Vault - Premium Electronics</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">Bytes Vault</a>
+        <div class="nav-links">
+            <a href="shop.html">Shop</a>
+            <a href="cart.html">Cart <span id="cart-count">(0)</span></a>
+            <a href="login.html" id="auth-link">Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div style="text-align: center; padding: 4rem 1rem; background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%); color: white;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Upgrade Your Setup</h1>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #ccc;">The best GPUs, CPUs, and Peripherals in one vault.</p>
+        <a href="shop.html" class="btn-primary" style="display: inline-block; width: auto; padding: 1rem 2rem;">Browse Catalog</a>
+    </div>
+
+    <!-- Featured Section -->
+    <div class="admin-container">
+        <h2 style="margin: 2rem 0;">New Arrivals</h2>
+        <div class="product-grid" id="featured-grid">
+            <!-- JS will populate this -->
+        </div>
+    </div>
+
+    <script src="js/shop.js"></script>
+</body>
+</html>
