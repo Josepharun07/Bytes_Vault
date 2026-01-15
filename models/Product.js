@@ -1,29 +1,45 @@
+// models/Product.js
 const mongoose = require('mongoose');
 
-const ProductSchema = new mongoose.Schema({
-    name: {
+const catalogItemSchema = new mongoose.Schema({
+    itemName: {
         type: String,
-        required: [true, 'Please add a product name'],
-        trim: true,
-        maxlength: [100, 'Name can not be more than 100 characters']
+        required: [true, 'Product name is required'],
+        trim: true
+    },
+    sku: { // Stock Keeping Unit (Unique ID)
+        type: String,
+        required: true,
+        unique: true,
+        uppercase: true
     },
     price: {
         type: Number,
-        required: [true, 'Please add a price']
+        required: [true, 'Price is required'],
+        min: 0
     },
-    stock: {
+    stockCount: {
         type: Number,
-        required: [true, 'Please add stock quantity'],
+        required: true,
+        min: 0,
         default: 0
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: ['GPU', 'CPU', 'Laptop', 'Peripheral', 'Console', 'Other']
     },
     description: {
         type: String,
-        required: [true, 'Please add a description'],
-        maxlength: [500, 'Description can not be more than 500 characters']
+        required: true
     },
     imageUrl: {
         type: String,
-        default: 'no-photo.jpg'
+        default: 'uploads/no-image.jpg'
+    },
+    specs: {
+        type: Map, // Flexible object for tech specs (e.g., { "RAM": "16GB" })
+        of: String
     },
     createdAt: {
         type: Date,
@@ -31,4 +47,4 @@ const ProductSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Product', ProductSchema);
+module.exports = mongoose.model('Product', catalogItemSchema);

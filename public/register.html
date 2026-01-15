@@ -1,35 +1,39 @@
-<!-- public/login.html -->
+<!-- public/register.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Bytes Vault</title>
+    <title>Register - Bytes Vault</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
             <h1>Bytes Vault</h1>
-            <p>Secure Access Portal</p>
+            <p>Create New Identity</p>
         </div>
 
         <div id="error-message" class="alert alert-error"></div>
 
-        <form id="login-form">
+        <form id="register-form">
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" class="form-control" placeholder="John Doe" required>
+            </div>
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" class="form-control" placeholder="user@example.com" required>
             </div>
             <div class="form-group">
-                <label for="password">Access Key (Password)</label>
-                <input type="password" id="password" class="form-control" placeholder="******" required>
+                <label for="password">Create Access Key</label>
+                <input type="password" id="password" class="form-control" placeholder="******" required minlength="6">
             </div>
-            <button type="submit" class="btn-primary">Authenticate</button>
+            <button type="submit" class="btn-primary">Register Identity</button>
         </form>
 
         <div class="auth-footer">
-            <p>New member? <a href="register.html">Register Identity</a></p>
+            <p>Already verified? <a href="login.html">Login</a></p>
         </div>
     </div>
 

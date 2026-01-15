@@ -1,9 +1,9 @@
+// routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
-const { registerCustomer, authenticateCustomer } = require('../controllers/authController');
+const { registerNewMember, authenticateMember } = require('../controllers/authController');
 
-// Map routes to controller functions
-router.post('/register', registerCustomer);
-router.post('/login', authenticateCustomer);
+router.post('/register', registerNewMember);
+router.post('/login', authenticateMember);
 
 module.exports = router;

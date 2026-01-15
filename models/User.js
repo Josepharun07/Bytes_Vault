@@ -1,55 +1,43 @@
+// models/User.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
-// User Schema Definition
-const UserSchema = new mongoose.Schema({
-    name: {
+const memberIdentitySchema = new mongoose.Schema({
+    fullName: {
         type: String,
-        required: [true, 'Please add a name']
+        required: [true, 'Please provide a full name'],
+        trim: true
     },
-    email: {
+    emailAddress: {
         type: String,
-        required: [true, 'Please add an email'],
+        required: [true, 'Email address is mandatory'],
         unique: true,
+        lowercase: true,
         match: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please add a valid email'
+            'Please provide a valid email structure'
         ]
     },
-    role: {
+    accessKey: { // This is the password
         type: String,
-        enum: ['user'],
-        default: 'user'
-    },
-    password: {
-        type: String,
-        required: [true, 'Please add a password'],
+        required: [true, 'Security key (password) is required'],
         minlength: 6,
-        select: false // Do not return password by default
+        select: false // Do not return password by default in queries
     },
-    address: {
+    privilegeLevel: { // This is the role
         type: String,
-        default: ''
+        enum: ['customer', 'admin'],
+        default: 'customer'
     },
-    createdAt: {
+    shippingCoordinates: { // Address object
+        street: String,
+        city: String,
+        zipCode: String,
+        country: String
+    },
+    registrationDate: {
         type: Date,
         default: Date.now
     }
 });
 
-// Encrypt password using bcrypt before saving
-UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        next();
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-});
-
-// Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', memberIdentitySchema);

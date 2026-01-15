@@ -1,93 +1,90 @@
+// controllers/authController.js
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Helper function to sign JWT
-const signToken = (id) => {
+// Helper to sign JWT
+const generateSessionToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d' // Token expires in 30 days
+        expiresIn: '24h' // Session lasts 1 day
     });
 };
 
-// @desc    Register a new user
+// @desc    Register a new member
 // @route   POST /api/auth/register
-// @access  Public
-exports.registerCustomer = async (req, res) => {
+exports.registerNewMember = async (req, res) => {
     try {
-        const { name, email, password, address } = req.body;
+        const { fullName, email, password, role } = req.body;
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
-        }
+        // 1. Encryption
+        const saltRounds = await bcrypt.genSalt(10);
+        const encryptedKey = await bcrypt.hash(password, saltRounds);
 
-        // Create new user
-        const newUser = await User.create({
-            name,
-            email,
-            password,
-            address
+        // 2. Persistence
+        const newMember = await User.create({
+            fullName,
+            emailAddress: email,
+            accessKey: encryptedKey,
+            privilegeLevel: role || 'customer' // Default to customer
         });
 
-        // Generate token
-        const token = signToken(newUser._id);
+        // 3. Token Generation
+        const sessionToken = generateSessionToken(newMember._id);
 
         res.status(201).json({
             success: true,
-            token,
-            data: {
-                id: newUser._id,
-                name: newUser.name,
-                email: newUser.email,
-                role: newUser.role
+            token: sessionToken,
+            member: {
+                id: newMember._id,
+                name: newMember.fullName,
+                role: newMember.privilegeLevel
             }
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+
+    } catch (err) {
+        // Handle Duplicate Email Error (MongoDB code 11000)
+        if (err.code === 11000) {
+            return res.status(400).json({ success: false, message: 'Email is already registered in the vault.' });
+        }
+        res.status(500).json({ success: false, message: err.message });
     }
 };
 
-// @desc    Authenticate user & get token
+// @desc    Login member
 // @route   POST /api/auth/login
-// @access  Public
-exports.authenticateCustomer = async (req, res) => {
+exports.authenticateMember = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validate email & password
+        // 1. Check if email/password exists
         if (!email || !password) {
-            return res.status(400).json({ success: false, message: 'Please provide an email and password' });
+            return res.status(400).json({ success: false, message: 'Please provide credentials.' });
         }
 
-        // Check for user (include password)
-        const databaseUser = await User.findOne({ email }).select('+password');
-        if (!databaseUser) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        // 2. Find Member (explicitly select password since it was hidden in model)
+        const targetMember = await User.findOne({ emailAddress: email }).select('+accessKey');
+
+        if (!targetMember) {
+            return res.status(401).json({ success: false, message: 'Invalid credentials.' });
         }
 
-        // Check if password matches
-        const isMatch = await databaseUser.matchPassword(password);
+        // 3. Verify Key
+        const isMatch = await bcrypt.compare(password, targetMember.accessKey);
+
         if (!isMatch) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials.' });
         }
 
-        // Generate token
-        const token = signToken(databaseUser._id);
+        // 4. Issue Token
+        const sessionToken = generateSessionToken(targetMember._id);
 
         res.status(200).json({
             success: true,
-            token,
-            data: {
-                id: databaseUser._id,
-                name: databaseUser.name,
-                email: databaseUser.email,
-                role: databaseUser.role
-            }
+            token: sessionToken,
+            role: targetMember.privilegeLevel
         });
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 };

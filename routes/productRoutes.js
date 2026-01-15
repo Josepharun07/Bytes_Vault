@@ -1,23 +1,15 @@
+// routes/productRoutes.js
 const express = require('express');
 const router = express.Router();
-const {
-    getProducts,
-    createProduct,
-    updateProduct,
-    deleteProduct
-} = require('../controllers/productController');
+const { createCatalogItem, fetchCatalog, removeItem } = require('../controllers/productController');
+const upload = require('../middleware/uploadMiddleware');
 
-const { verifyAuthenticationToken, authorizeAdmin } = require('../middleware/authMiddleware');
+// Public Route (View Products)
+router.get('/', fetchCatalog);
 
-// Public route to view products
-router.get('/', getProducts);
-
-// Protected Admin routes
-router.use(verifyAuthenticationToken);
-router.use(authorizeAdmin);
-
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+// Admin Routes (Write Access)
+// Note: We will add Auth Middleware here later. For now, it's open for testing.
+router.post('/', upload.single('image'), createCatalogItem);
+router.delete('/:id', removeItem);
 
 module.exports = router;
