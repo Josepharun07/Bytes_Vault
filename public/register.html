@@ -30,32 +30,6 @@
     </div>
   </div>
 
-  <script>
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const nameVal = document.getElementById('name').value;
-      const emailVal = document.getElementById('email').value;
-      const passVal = document.getElementById('password').value;
-
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: nameVal, // INTEGRATION FIX: Backend expects 'fullName'
-          email: emailVal,
-          password: passVal
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        alert("Account created. Please login.");
-        window.location.href = "/login.html";
-      } else {
-        alert(data.message || "Registration failed");
-      }
-    });
-  </script>
+  <script src="js/register-logic.js"></script>
 </body>
 </html>

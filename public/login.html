@@ -27,44 +27,6 @@
     </div>
   </div>
 
-  <script>
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const emailVal = document.getElementById('email').value;
-      const passVal = document.getElementById('password').value;
-
-      try {
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: emailVal,
-            password: passVal
-          })
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          // INTEGRATION FIX: Use consistent keys
-          localStorage.setItem("vault_token", data.token);
-          localStorage.setItem("vault_role", data.role);
-
-          // Redirect based on role
-          if(data.role === 'admin') {
-            window.location.href = "/dashboard.html";
-          } else {
-            window.location.href = "/shop.html";
-          }
-        } else {
-          alert(data.message || "Login failed");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Server connection failed");
-      }
-    });
-  </script>
+  <script src="js/login-logic.js"></script>
 </body>
 </html>

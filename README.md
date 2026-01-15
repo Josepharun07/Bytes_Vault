@@ -1,96 +1,128 @@
-# Bytes_Vault
+
 # Bytes Vault - E-Commerce & Inventory Management System
 
-Bytes Vault is a robust E-Commerce and Inventory Management System designed for efficient product management, user authentication, and admin oversight. This project implements a modern MVC (Model-View-Controller) architecture using Node.js, Express, and MongoDB.
+**Bytes Vault** is a full-stack E-Commerce platform built to demonstrate advanced software engineering principles using a strict **"Vanilla" Tech Stack** (No Frontend Frameworks). It features a secure REST API, Role-Based Access Control (RBAC), and a dual-interface system for both Customers (Storefront) and Administrators (Inventory Dashboard).
 
-## 🚀 Features
+## 🚀 Implemented Features
 
-### Authentication & Authorization
-- **User Auth**: Secure registration and login for customers.
-- **Admin Auth**: Multi-level admin access (Admin and Super Admin).
-- **JWT Protection**: Secure API endpoints using JSON Web Tokens.
+### 🔐 1. Authentication & Security
+*   **Unified Auth System:** Single entry point for both Customers and Admins.
+*   **JWT Implementation:** Stateless authentication using JSON Web Tokens stored in LocalStorage.
+*   **Security:** Passwords hashed via `bcryptjs`. Protected routes verify tokens before granting access.
+*   **Role-Based Access Control (RBAC):** Middleware restricts sensitive endpoints (like Inventory Management) to `admin` role users only.
 
-### Inventory Management
-- **Product CRUD**: Full Create, Read, Update, and Delete capabilities for products.
-- **Departmental Logic**: Admins assigned to specific departments for localized management.
+### 📦 2. Inventory Management (Admin Side)
+*   **Dynamic Inventory:** Admins can Create, Read, and Delete products.
+*   **Image Uploads:** Integrated `Multer` middleware for handling product image file uploads.
+*   **Dynamic Specifications:** Custom logic allowing Admins to add variable technical specs (e.g., RAM, VRAM) as key-value pairs without altering the database schema.
+*   **Stock Monitoring:** Visual indicators in the dashboard for Low Stock items (< 5 units).
 
-### User Management
-- **Profile Management**: Users can update their personal information.
-- **Admin Dashboard**: Centralized hub for managing system resources.
+### 🛍️ 3. Storefront (Customer Side)
+*   **Product Discovery:** Dynamic grid layout rendering products from the database.
+*   **Advanced Filtering:** Filter by Categories (GPU, CPU, etc.) and Real-time Search.
+*   **Product Details:** dedicated page parsing URL parameters to fetch and display specific item details, images, and specs.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB (Mongoose ODM)
-- **Security**: Bcrypt.js (hashing), Helmet (security headers), JWT
-- **Frontend**: HTML5, Vanilla CSS, JavaScript
-- **Testing**: Mocha, Chai, Supertest
-- **Logging**: Morgan
-
-## 📁 Project Structure
-
-```text
-├── config/             # Database connection configuration
-├── controllers/        # Request handling logic (MVC)
-├── middleware/         # Custom Express middleware (Auth, Error handling)
-├── models/             # Mongoose schemas (User, Admin, Product)
-├── public/             # Frontend assets (HTML, CSS, JS)
-├── routes/             # API route definitions
-├── test/               # Automated test suites
-├── seeder.js           # Database seeding script
-└── server.js           # Application entry point
-```
-
-## ⚙️ Setup Instructions
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v14+)
-- [MongoDB](https://www.mongodb.com/) (Local or Atlas)
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd Bytes_Vault
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the root directory and add:
-   ```env
-   PORT=5000
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   NODE_ENV=development
-   ```
-
-### Database Seeding
-To initialize the system with a Super Admin:
-```bash
-node seeder.js
-```
-*Check `seeder.js` for default credentials.*
-
-### Running the App
-- **Development**: `npm run dev`
-- **Production**: `npm start`
-
-## 🧪 Testing
-Run the automated test suite:
-```bash
-npm test
-```
-
-## 🛣️ API Endpoints (Summary)
-
-| Endpoint | Method | Description |
+| Component | Technology | Description |
 | :--- | :--- | :--- |
-| `/api/auth/register` | POST | Register a new user |
-| `/api/auth/login` | POST | User login |
-| `/api/admins/login` | POST | Admin login |
-| `/api/products` | GET | List all products |
-| `/api/users/profile` | GET | Get current user profile |
+| **Runtime** | Node.js | Server-side JavaScript environment. |
+| **Framework** | Express.js | REST API routing and middleware management. |
+| **Database** | MongoDB Atlas | Cloud NoSQL database. |
+| **ODM** | Mongoose | Schema validation and data modeling. |
+| **Frontend** | HTML5, CSS3, Vanilla JS | DOM manipulation via `fetch()` API. No React/Vue. |
+| **Auth** | JWT & Bcrypt | Token signing and Password encryption. |
+| **File I/O** | Multer | Handling multipart/form-data (Image uploads). |
+| **Testing** | Mocha, Chai, Supertest | Automated Unit and Integration testing. |
 
 ---
-*Developed by the Bytes Vault Team.*
+
+## 📁 Project Architecture & Structure
+
+The project follows a strict **MVC (Model-View-Controller)** pattern.
+
+```text
+/Bytes_Vault
+├── config/
+│   └── db.js            # MongoDB Atlas connection logic
+├── controllers/         # BUSINESS LOGIC
+│   ├── authController.js    # Handles Register/Login & Token generation
+│   └── productController.js # Handles CRUD, Image processing, Search logic
+├── middleware/          # INTERCEPTORS
+│   ├── authMiddleware.js    # Verifies JWT and checks Admin Role
+│   └── uploadMiddleware.js  # Multer config for /public/uploads
+├── models/              # DATABASE SCHEMAS
+│   ├── User.js              # Stores credentials & roles
+│   └── Product.js           # Stores item details & dynamic specs
+├── public/              # FRONTEND (The View)
+│   ├── css/                 # Global styles
+│   ├── js/                  # Client-side Logic (Fetch API calls)
+│   ├── uploads/             # Stores uploaded product images
+│   ├── dashboard.html       # Admin Interface
+│   ├── index.html           # Landing Page
+│   ├── login.html           # Auth Interface
+│   ├── shop.html            # Catalog Interface
+│   └── product.html         # Item Detail Interface
+├── routes/              # API DEFINITIONS
+│   ├── authRoutes.js        # /api/auth endpoints
+│   └── productRoutes.js     # /api/products endpoints
+├── test/                # QA
+│   ├── auth.test.js         # Unit tests for Auth
+│   ├── product.test.js      # Unit tests for Inventory
+│   └── full_system.test.js  # End-to-End Integration tests
+└── server.js            # Entry Point & Server Config
+🛣️ API Documentation
+Authentication Module
+Method	Endpoint	Access	Payload	Description
+POST	/api/auth/register	Public	{fullName, email, password}	Creates a new user.
+POST	/api/auth/login	Public	{email, password}	Returns JWT Token & Role.
+Product Module
+Method	Endpoint	Access	Query Params	Description
+GET	/api/products	Public	?search=name&category=type	Fetches filtered catalog.
+POST	/api/products	Admin	FormData (File + Fields)	Creates item with Image.
+DELETE	/api/products/:id	Admin	None	Removes an item.
+🖥️ UI Page Map
+index.html: Landing page featuring a Hero banner and "New Arrivals".
+shop.html: The main catalog. Contains the Sidebar (Categories) and Search Bar. Uses shop.js to dynamically fetch and render product cards.
+product.html: Detailed view. Reads ?id=XYZ from the URL, fetches that specific ID from the API, and renders specs/reviews.
+dashboard.html: (Admin Only). Protected by JS Logic. Allows uploading new items via a Modal and viewing the inventory table.
+login.html / register.html: Forms for user access.
+⚙️ Setup Instructions
+1. Installation
+Clone the repo and install dependencies:
+code
+Bash
+git clone <repository-url>
+cd Bytes_Vault
+npm install
+2. Environment Configuration
+Create a .env file in the root:
+code
+Properties
+PORT=3000
+NODE_ENV=development
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
+3. Running the Server
+code
+Bash
+# Run in development mode (with Nodemon)
+npm run dev
+Server will start at http://localhost:3000
+4. Running Tests
+To verify the system integrity (Auth flow, Database connections, API responses):
+code
+Bash
+# Runs the full Mocha test suite
+npm test
+🧪 Testing Strategy
+We utilize Automated Integration Testing to simulate real user journeys without manual input.
+Tools: Mocha (Runner), Chai (Assertions), Supertest (HTTP Requests).
+Coverage:
+Admin Registration & Product Upload.
+Customer Registration & Login.
+Catalog Browsing & Filtering.
+Error handling (Duplicate emails, Missing fields).
+Developed by the Bytes Vault Team for SIT725.

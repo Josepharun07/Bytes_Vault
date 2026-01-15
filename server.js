@@ -17,7 +17,9 @@ initiateDataLayer();
 // 2. Middleware Pipeline
 vaultApp.use(express.json()); // Parse JSON bodies
 vaultApp.use(express.urlencoded({ extended: true }));
-vaultApp.use(helmet()); // Security Headers
+
+//vaultApp.use(helmet()); // Security Headers
+
 vaultApp.use(morgan('dev')); // Logger
 vaultApp.use('/api/auth', authRoutes); 
 
