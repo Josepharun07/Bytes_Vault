@@ -1,77 +1,116 @@
-<!-- public/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard | Bytes Vault</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="admin-container">
-    <div class="dashboard-header">
-      <h2>Product Inventory</h2>
-      <button onclick="logout()" class="btn-secondary">Logout</button>
+    
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>Inventory Command</h1>
+                <p>Welcome, <span id="admin-name">Admin</span></p>
+            </div>
+            <div>
+                <button id="add-product-btn" class="btn-primary">+ Add New Item</button>
+                <button id="logout-btn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="table-responsive">
+            <table id="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Javascript will insert rows here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Note: We kept the table simple as per teammate's design, 
-         but added the image column for better visibility -->
-    <div class="table-responsive">
-      <table id="inventory-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="products"></tbody>
-      </table>
+    <!-- Add Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Add to Catalog</h2>
+            
+            <form id="add-product-form" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>SKU (Unique ID)</label>
+                        <input type="text" name="sku" class="form-control" placeholder="GPU-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" class="form-control">
+                            <option value="GPU">GPU</option>
+                            <option value="CPU">CPU</option>
+                            <option value="Motherboard">Motherboard</option>
+                            <option value="RAM">RAM</option>
+                            <option value="Storage">Storage</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Peripheral">Peripheral</option>
+                            <option value="Console">Console</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" name="price" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Count</label>
+                        <input type="number" name="stock" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <!-- DYNAMIC SPECS SECTION -->
+                <div class="form-group">
+                    <label>Technical Specifications</label>
+                    <div id="specs-container" style="margin-bottom: 10px; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
+                        <!-- JS will add inputs here -->
+                    </div>
+                    <button type="button" id="add-spec-btn" class="btn-secondary" style="font-size: 0.9rem; width: auto;">+ Add Spec Row</button>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save to Database</button>
+            </form>
+        </div>
     </div>
-  </div>
 
-  <script>
-    async function loadProducts() {
-      // INTEGRATION FIX: Use the key 'vault_token' from our auth system
-      const token = localStorage.getItem("vault_token");
-      const role = localStorage.getItem("vault_role");
-
-      // Security check
-      if (!token || role !== 'admin') {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      // INTEGRATION FIX: Correct API endpoint '/api/products'
-      const res = await fetch("/api/products", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const result = await res.json(); // Our API returns { success: true, data: [...] }
-      const products = result.data || [];
-
-      document.getElementById("products").innerHTML =
-        products.map(p => {
-            const imgUrl = p.imageUrl || 'uploads/products/no-image.jpg';
-            return `
-              <tr style="background:${p.stockCount < 5 ? '#fff3cd' : 'white'}">
-                <td><img src="${imgUrl}" width="50" style="border-radius:4px"></td>
-                <td>${p.itemName}</td>
-                <td>$${p.price}</td>
-                <td>${p.stockCount}</td>
-                <td>${p.stockCount < 5 ? 'Low Stock' : 'OK'}</td>
-              </tr>
-            `;
-        }).join("");
-    }
-
-    function logout() {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    }
-
-    loadProducts();
-  </script>
+    <!-- LINK TO EXTERNAL FILE (Fixes CSP Error) -->
+    <script src="js/admin.js"></script>
 </body>
 </html>

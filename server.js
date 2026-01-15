@@ -49,11 +49,37 @@ vaultApp.use((err, req, res, next) => {
 
 // 6. Server Activation
 const SYSTEM_PORT = process.env.PORT || 3000;
+const BASE_URL = `http://localhost:${SYSTEM_PORT}`;
 
 if (require.main === module) {
     vaultApp.listen(SYSTEM_PORT, () => {
-        console.log(`🚀 BytesVault Engine running on port ${SYSTEM_PORT}`);
+        // Clear console for a fresh view (optional)
+        // console.clear(); 
+
+        console.log(`\n\x1b[36m%s\x1b[0m`, `🚀 Bytes Vault Engine Online`);
+        console.log(`\x1b[33m%s\x1b[0m`, `--------------------------------------------------`);
+        console.log(`\x1b[1m%s\x1b[0m`, `📡 ENVIRONMENT:  ${process.env.NODE_ENV || 'development'}`);
+        console.log(`\x1b[1m%s\x1b[0m`, `🔌 PORT:         ${SYSTEM_PORT}`);
+        console.log(`\x1b[33m%s\x1b[0m`, `--------------------------------------------------`);
+        
+        console.log(`\x1b[35m%s\x1b[0m`, `🔗 AVAILABLE ACCESS POINTS (Ctrl + Click to Open):`);
+        
+        // --- CUSTOMER LINKS ---
+        console.log(`   🏠 Home:         \x1b[34m${BASE_URL}/\x1b[0m`);
+        console.log(`   🛍️  Shop:         \x1b[34m${BASE_URL}/shop.html\x1b[0m`);
+        console.log(`   🛒 Cart:         \x1b[34m${BASE_URL}/cart.html\x1b[0m`); // We will build this next
+        
+        // --- AUTH LINKS ---
+        console.log(`\n   🔑 Login:        \x1b[34m${BASE_URL}/login.html\x1b[0m`);
+        console.log(`   📝 Register:     \x1b[34m${BASE_URL}/register.html\x1b[0m`);
+        
+        // --- ADMIN LINKS ---
+        console.log(`\n   🛡️  Admin Panel:  \x1b[34m${BASE_URL}/dashboard.html\x1b[0m`);
+        
+        // --- API LINKS ---
+        console.log(`\n   ⚙️  API Health:   \x1b[34m${BASE_URL}/api/health\x1b[0m`);
+        console.log(`\x1b[33m%s\x1b[0m`, `--------------------------------------------------\n`);
     });
 }
 
-module.exports = vaultApp; // Export for Testingnode
+module.exports = vaultApp;

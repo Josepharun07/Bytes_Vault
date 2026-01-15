@@ -1,18 +1,18 @@
-
+// config/db.js
 const mongoose = require('mongoose');
 
 const initiateDataLayer = async () => {
     try {
-        const connectionString = process.env.MONGO_URI;
-        
-        const connectionInstance = await mongoose.connect(connectionString, {
-            
-        });
+        const conn = await mongoose.connect(process.env.MONGO_URI);
 
-        console.log(`📡 DataStore Active: Host ${connectionInstance.connection.host}`);
-    } catch (systemFailure) {
-        console.error(`❌ DataStore Failure: ${systemFailure.message}`);
-        process.exit(1); 
+        console.log(`\n\x1b[32m%s\x1b[0m`, `✔ MongoDB Connected Successfully!`);
+        console.log(`   🔸 Host: ${conn.connection.host}`);
+        console.log(`   🔸 Database: ${conn.connection.name}`);
+        console.log(`   🔸 State: Connected`);
+
+    } catch (error) {
+        console.error(`\x1b[31m%s\x1b[0m`, `❌ Database Connection Failed: ${error.message}`);
+        process.exit(1);
     }
 };
 
