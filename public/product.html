@@ -1,0 +1,97 @@
+<!-- public/product.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details | Bytes Vault</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+  <nav class="navbar">
+      <a href="index.html" class="nav-brand">Bytes Vault</a>
+      <div class="nav-links">
+          <a href="shop.html">Back to Shop</a>
+      </div>
+  </nav>
+
+  <div class="admin-container" style="margin-top: 2rem;">
+      <div id="product-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; background: white; padding: 2rem; border-radius: 8px;">
+          <!-- Content injected by JS -->
+      </div>
+
+      <div style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px;">
+        <h3>Customer Reviews</h3>
+        <ul id="reviews-list" style="margin-top: 1rem; padding-left: 1.5rem;">
+            <!-- Reviews injected here -->
+        </ul>
+      </div>
+  </div>
+
+  <script>
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    async function loadProduct() {
+      if(!id) return;
+
+      try {
+        const res = await fetch(`/api/products`); // We fetch all and filter in JS for simplicity, or implement /api/products/:id
+        const result = await res.json();
+        
+        // Find specific product (Optimized: In production, backend should support /:id)
+        const product = result.data.find(p => p._id === id);
+
+        if (!product) {
+            document.body.innerHTML = "<h2>Product not found</h2>";
+            return;
+        }
+
+        const imgUrl = product.imageUrl || 'uploads/products/no-image.jpg';
+
+        // Render Specs
+        let specsHtml = '';
+        if (product.specs) {
+            // Handle if specs is a Map or Object
+            const entries = product.specs instanceof Map ? Object.fromEntries(product.specs) : product.specs;
+            specsHtml = Object.entries(entries).map(
+                ([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`
+            ).join("");
+        }
+
+        document.getElementById("product-container").innerHTML = `
+          <div>
+            <img src="${imgUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #eee;"/>
+          </div>
+          <div>
+            <h1 style="color:var(--vault-text)">${product.itemName}</h1>
+            <h2 style="color:var(--vault-blue); margin: 0.5rem 0;">$${product.price}</h2>
+            <p><strong>Stock:</strong> ${product.stockCount} units</p>
+            <p style="margin: 1rem 0; color: #666;">${product.description}</p>
+            
+            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
+            <h4>Technical Specifications:</h4>
+            <ul>${specsHtml}</ul>
+            
+            <button class="btn-primary" style="margin-top: 2rem;">Add to Cart</button>
+          </div>
+        `;
+
+        // Render Reviews (Check if reviews exist)
+        const reviews = product.reviews || [];
+        if (reviews.length > 0) {
+            document.getElementById("reviews-list").innerHTML =
+                reviews.map(r => `<li><strong>${r.user}:</strong> ${r.comment}</li>`).join("");
+        } else {
+            document.getElementById("reviews-list").innerHTML = "<p>No reviews yet.</p>";
+        }
+
+      } catch (err) {
+          console.error(err);
+      }
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
