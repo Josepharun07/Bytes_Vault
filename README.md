@@ -105,7 +105,7 @@ The project follows a strict **MVC (Model-View-Controller)** pattern.
 ### 1. Installation
 Clone the repo and install dependencies:
 ```bash
-git clone <repository-url> //add url
+git clone https://github.com/Josepharun07/Bytes_Vault.git
 cd Bytes_Vault
 npm install
 
