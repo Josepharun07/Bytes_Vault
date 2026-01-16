@@ -1,6 +1,8 @@
 // controllers/orderController.js
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const User = require('../models/User');
+
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -97,6 +99,44 @@ exports.updateOrderStatus = async (req, res) => {
         await order.save();
 
         res.status(200).json({ success: true, message: 'Order updated', order });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Get Admin Dashboard Stats
+// @route   GET /api/orders/admin/stats
+exports.getDashboardStats = async (req, res) => {
+    try {
+        // 1. Total Revenue
+        const orders = await Order.find({ status: { $ne: 'Cancelled' } });
+        const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+
+        // 2. Counts
+        const totalOrders = await Order.countDocuments();
+        const totalUsers = await User.countDocuments({ privilegeLevel: 'customer' });
+        
+        // 3. Low Stock Items
+        const lowStockProducts = await Product.find({ stockCount: { $lt: 5 } })
+            .select('itemName stockCount imageUrl')
+            .limit(5);
+
+        // 4. Recent Orders
+        const recentOrders = await Order.find({})
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate('user', 'fullName');
+
+        res.status(200).json({
+            success: true,
+            stats: {
+                revenue: totalRevenue,
+                orders: totalOrders,
+                users: totalUsers,
+                lowStock: lowStockProducts,
+                recentOrders: recentOrders
+            }
+        });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

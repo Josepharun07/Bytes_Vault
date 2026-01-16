@@ -112,3 +112,76 @@ exports.removeItem = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+// @desc    Update product details
+// @route   PUT /api/products/:id
+exports.updateCatalogItem = async (req, res) => {
+    try {
+        const { name, price, stock, description, category } = req.body;
+        
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Update fields if provided
+        if(name) product.itemName = name;
+        if(price) product.price = price;
+        if(stock) product.stockCount = stock;
+        if(description) product.description = description;
+        if(category) product.category = category;
+
+        // If new image uploaded
+        if (req.file) {
+            product.imageUrl = `uploads/products/${req.file.filename}`;
+        }
+
+        await product.save();
+        res.status(200).json({ success: true, data: product });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Create new review
+// @route   POST /api/products/:id/reviews
+exports.createProductReview = async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Check if user already reviewed
+        const alreadyReviewed = product.reviews.find(
+            (r) => r.user.toString() === req.user._id.toString()
+        );
+
+        if (alreadyReviewed) {
+            return res.status(400).json({ success: false, message: 'Product already reviewed' });
+        }
+
+        const review = {
+            name: req.user.fullName,
+            rating: Number(rating),
+            comment,
+            user: req.user._id,
+        };
+
+        product.reviews.push(review);
+
+        // Update average rating
+        product.numReviews = product.reviews.length;
+        product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+        await product.save();
+        res.status(201).json({ success: true, message: 'Review added' });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};

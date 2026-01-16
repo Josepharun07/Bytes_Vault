@@ -1,28 +1,27 @@
+// controllers/userController.js
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
-// @desc    Get all users
+// @desc    Get all users (Admin Dashboard)
 // @route   GET /api/users
-// @access  Private (Super Admin / Admin)
-exports.getUsers = async (req, res, next) => {
+exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json({ success: true, count: users.length, data: users });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
+        const users = await User.find({}).select('-accessKey'); // Don't send passwords
+        res.status(200).json({ success: true, data: users });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 };
 
 // @desc    Update user role (Promote/Demote)
 // @route   PUT /api/users/:id/role
-// @access  Private (Super Admin Only)
-exports.updateUserRole = async (req, res, next) => {
+exports.updateUserRole = async (req, res) => {
     try {
-        const { role } = req.body;
+        const { role } = req.body; // Expecting 'admin' or 'customer'
 
-        // Only allow 'user' or 'admin' roles to be set by Super Admin. 
-        // SuperAdmin role itself should be protected or manually seeded, but we'll allow it if needed.
-        if (!['user', 'admin'].includes(role)) {
-            return res.status(400).json({ success: false, message: 'Invalid role' });
+        // 1. Validate Input against Schema Enums
+        if (!['customer', 'admin'].includes(role)) {
+            return res.status(400).json({ success: false, message: 'Invalid role provided' });
         }
 
         const user = await User.findById(req.params.id);
@@ -31,48 +30,75 @@ exports.updateUserRole = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Prevent modifying self via this route to avoid locking out, though not strictly required
+        // 2. Prevent Self-Lockout (Cannot demote yourself)
         if (user._id.toString() === req.user._id.toString()) {
-            return res.status(400).json({ success: false, message: 'Cannot change your own role via this endpoint' });
+            return res.status(400).json({ success: false, message: 'You cannot change your own role.' });
         }
 
-        user.role = role;
+        // 3. Update the Field (Schema uses 'privilegeLevel')
+        user.privilegeLevel = role;
         await user.save();
 
-        res.status(200).json({ success: true, data: user });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
-    }
-};
+        res.status(200).json({ 
+            success: true, 
+            message: `User updated to ${role}`,
+            data: user 
+        });
 
-// @desc    Get ALL orders (Admin only)
-// @route   GET /api/orders/admin/all
-exports.getAllOrders = async (req, res) => {
-    try {
-        const orders = await Order.find({})
-            .populate('user', 'id fullName email') // Get buyer details
-            .sort({ createdAt: -1 }); // Newest first
-            
-        res.status(200).json({ success: true, data: orders });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
 };
 
-// @desc    Update order status
-// @route   PUT /api/orders/:id/status
-exports.updateOrderStatus = async (req, res) => {
+// @desc    Admin Create User
+// @route   POST /api/users
+exports.createUser = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id);
+        const { fullName, email, password, role } = req.body;
+        
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
+        const user = await User.create({
+            fullName,
+            emailAddress: email,
+            accessKey: hashedPassword,
+            privilegeLevel: role
+        });
 
-        order.status = req.body.status;
-        await order.save();
+        res.status(201).json({ success: true, data: user });
+    } catch (err) {
+        if (err.code === 11000) return res.status(400).json({ success: false, message: 'Email exists' });
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
 
-        res.status(200).json({ success: true, message: 'Order updated', order });
+// @desc    Delete User
+// @route   DELETE /api/users/:id
+exports.deleteUser = async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'User deleted' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Admin Reset Password
+// @route   PUT /api/users/:id/password
+exports.resetUserPassword = async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+        const user = await User.findById(req.params.id);
+
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const salt = await bcrypt.genSalt(10);
+        user.accessKey = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Password reset successfully' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }

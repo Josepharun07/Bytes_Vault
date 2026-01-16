@@ -17,8 +17,14 @@ const { protect, admin } = require('../middleware/authMiddleware');
 router.post('/', protect, createOrder);
 router.get('/myorders', protect, getMyOrders);
 
+const { 
+    // ... existing ...
+    getDashboardStats // <-- Import this
+} = require('../controllers/orderController');
+
 // Admin Routes (This is where your error was happening)
 router.get('/admin/all', protect, admin, getAllOrders);
 router.put('/:id/status', protect, admin, updateOrderStatus);
+router.get('/admin/stats', protect, admin, getDashboardStats);
 
 module.exports = router;

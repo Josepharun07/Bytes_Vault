@@ -8,6 +8,7 @@ const initiateDataLayer = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 
 // Initialize App
@@ -24,6 +25,7 @@ vaultApp.use(express.urlencoded({ extended: true }));
 
 vaultApp.use(morgan('dev')); // Logger
 vaultApp.use('/api/auth', authRoutes); 
+vaultApp.use('/api/products', productRoutes); 
 
 // 3. Serve Static UI (The Vanilla Frontend)
 // This serves everything in /public as if it were the root
@@ -40,6 +42,7 @@ vaultApp.get('/api/health', (req, res) => {
 vaultApp.use('/api/auth', require('./routes/authRoutes'));
 vaultApp.use('/api/products', require('./routes/productRoutes'));
 vaultApp.use('/api/orders', orderRoutes);
+vaultApp.use('/api/users', userRoutes);
 
 // 5. Global Error Handler
 vaultApp.use((err, req, res, next) => {

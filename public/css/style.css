@@ -342,3 +342,131 @@ th {
 .modal {
     z-index: 9999 !important;
 }
+
+/* --- ADMIN SUITE LAYOUT --- */
+.admin-wrapper {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Sidebar | Content */
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--vault-dark);
+    color: white;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    color: var(--vault-blue);
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.nav-item {
+    padding: 1rem;
+    color: #bbb;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Main Content Area */
+.main-content {
+    background-color: #f4f6f9;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Metric Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-info h3 { font-size: 2rem; margin: 0; color: var(--vault-dark); }
+.stat-info p { color: #666; margin: 0; font-size: 0.9rem; }
+.stat-icon { font-size: 2.5rem; opacity: 0.2; }
+
+/* Dashboard Sections */
+.dashboard-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+/* Hidden Sections (for tab switching) */
+.view-section { display: none; }
+.view-section.active { display: block; }
+
+/* --- CRITICAL FIX FOR UNCLICKABLE MODALS --- */
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 99999 !important; /* Force it above Sidebar (usually 1000) */
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    backdrop-filter: blur(2px); /* Optional: nice blur effect */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px;
+    border-radius: 8px;
+    
+    /* Ensure content accepts clicks */
+    position: relative;
+    z-index: 100000 !important; 
+    pointer-events: auto; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Ensure inputs inside modal are always clickable */
+.modal-content input, 
+.modal-content select, 
+.modal-content button {
+    position: relative;
+    z-index: 100001;
+}

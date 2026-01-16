@@ -3,53 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Bytes Vault</title>
+    <title>Admin Suite | Bytes Vault</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    
-    <div class="admin-container">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <div>
-                <h1>Inventory Command</h1>
-                <p>Welcome, <span id="admin-name">Admin</span></p>
-            </div>
-            <div>
-                <!-- NEW BUTTON HERE -->
-                <a href="admin-orders.html" class="btn-primary" style="text-decoration:none; margin-right: 10px;">Manage Orders</a>
-                
-                <button id="add-product-btn" class="btn-primary">+ Add New Item</button>
-                <button id="logout-btn" class="btn-secondary">Logout</button>
-            </div>
-        </div>
+<body style="display: block;">
 
-        <!-- Inventory Table -->
-        <div class="table-responsive">
-            <table id="inventory-table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Product Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Javascript will insert rows here -->
-                </tbody>
-            </table>
-        </div>
+    <div class="admin-wrapper">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h2>Bytes Vault</h2>
+            <div style="font-size:0.8rem; color:#666; padding-left:1rem; margin-bottom:1rem;">MANAGEMENT</div>
+            
+            <a onclick="switchView('dashboard')" class="nav-item active" id="nav-dashboard">
+                <span>📊</span> Dashboard
+            </a>
+            <a onclick="switchView('inventory')" class="nav-item" id="nav-inventory">
+                <span>📦</span> Inventory
+            </a>
+            <a onclick="switchView('orders')" class="nav-item" id="nav-orders">
+                <span>🚚</span> Orders
+            </a>
+            <a onclick="switchView('users')" class="nav-item" id="nav-users">
+                <span>👥</span> Users
+            </a>
+            
+            <div style="margin-top: auto;">
+                <a id="logout-btn" class="nav-item" style="color: var(--vault-danger);">
+                    <span>🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <h2 id="page-title" style="margin-bottom: 2rem;">Overview</h2>
+
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div><h3 id="stat-revenue">$0.00</h3><p>Revenue</p></div>
+                        <div class="stat-icon" style="color:green">💰</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><h3 id="stat-orders">0</h3><p>Orders</p></div>
+                        <div class="stat-icon" style="color:blue">🛒</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><h3 id="stat-users">0</h3><p>Users</p></div>
+                        <div class="stat-icon" style="color:orange">👥</div>
+                    </div>
+                </div>
+                <div class="dashboard-section">
+                    <h3>⚠️ Low Stock Alerts</h3>
+                    <ul id="low-stock-list"></ul>
+                </div>
+            </section>
+
+            <!-- 2. INVENTORY VIEW -->
+            <section id="view-inventory" class="view-section">
+                <div class="dashboard-header">
+                    <h3>Products</h3>
+                    <button id="add-product-btn" class="btn-primary">+ Add Product</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="inventory-table">
+                        <thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. ORDERS VIEW (Integrated) -->
+            <section id="view-orders" class="view-section">
+                <div class="dashboard-header">
+                    <h3>All Orders</h3>
+                </div>
+                <div class="table-responsive">
+                    <table id="orders-table">
+                        <thead><tr><th>ID</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
+                        <tbody id="orders-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. USERS VIEW (New) -->
+            <section id="view-users" class="view-section">
+                <div class="dashboard-header">
+                    <h3>User Directory</h3>
+                    <button onclick="openUserModal()" class="btn-primary">+ Create User</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="users-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Registered</th><th>Actions</th></tr></thead>
+                        <tbody id="users-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
     </div>
 
-    <!-- Add Product Modal -->
+    <!-- MODAL: ADD PRODUCT -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
+            <span class="close-modal" onclick="closeModal('product-modal')">&times;</span>
             <h2>Add to Catalog</h2>
-            
             <form id="add-product-form" enctype="multipart/form-data">
                 
                 <div class="form-group">
@@ -64,8 +124,9 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label>SKU (Unique ID)</label>
-                        <input type="text" name="sku" class="form-control" placeholder="GPU-001" required>
+                        <label>SKU</label>
+                        <!-- Will be auto-filled by JS -->
+                        <input type="text" name="sku" class="form-control" placeholder="Auto-Generated" required>
                     </div>
                     <div class="form-group">
                         <label>Category</label>
@@ -99,21 +160,56 @@
                     <textarea name="description" class="form-control" rows="3" required></textarea>
                 </div>
 
-                <!-- DYNAMIC SPECS SECTION -->
+                <!-- RESTORED: DYNAMIC SPECS CONTAINER -->
                 <div class="form-group">
                     <label>Technical Specifications</label>
-                    <div id="specs-container" style="margin-bottom: 10px; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
+                    <div id="specs-container" style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;">
                         <!-- JS will add inputs here -->
                     </div>
-                    <button type="button" id="add-spec-btn" class="btn-secondary" style="font-size: 0.9rem; width: auto;">+ Add Spec Row</button>
+                    <button type="button" id="add-spec-btn" class="btn-secondary" style="width: auto; font-size: 0.8rem;">+ Add Spec Row</button>
                 </div>
 
-                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save to Database</button>
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Product</button>
             </form>
         </div>
     </div>
 
-    <!-- LINK TO EXTERNAL FILE (Fixes CSP Error) -->
+    <!-- MODAL: CREATE USER -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-modal" onclick="closeModal('user-modal')">&times;</span>
+            <h2>Create User</h2>
+            <form id="create-user-form">
+                <div class="form-group"><label>Name</label><input type="text" id="new-name" class="form-control" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="new-email" class="form-control" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="new-pass" class="form-control" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="new-role" class="form-control">
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Create User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RESET PASSWORD -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-modal" onclick="closeModal('password-modal')">&times;</span>
+            <h2>Reset Password</h2>
+            <form id="reset-pass-form">
+                <input type="hidden" id="reset-user-id">
+                <p>Resetting password for: <b id="reset-user-email"></b></p>
+                <div class="form-group">
+                    <input type="password" id="reset-new-pass" class="form-control" placeholder="New Password" required>
+                </div>
+                <button type="submit" class="btn-danger">Update Password</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/admin.js"></script>
 </body>
 </html>
