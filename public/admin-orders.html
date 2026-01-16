@@ -1,0 +1,48 @@
+<!-- public/admin-orders.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>Order Fulfillment</h1>
+                <p>Manage Customer Shipments</p>
+            </div>
+            <div>
+                <!-- Link back to Inventory Dashboard -->
+                <a href="dashboard.html" class="btn-secondary" style="text-decoration:none; display:inline-block;">&larr; Back to Inventory</a>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-responsive">
+            <table id="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-body">
+                    <!-- JS Injects Rows Here -->
+                    <tr><td colspan="6">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin-orders.js"></script>
+</body>
+</html>

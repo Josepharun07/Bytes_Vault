@@ -2,41 +2,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Bytes Vault</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <title>Register | Bytes Vault</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-header">
-            <h1>Bytes Vault</h1>
-            <p>Create New Identity</p>
-        </div>
-
-        <div id="error-message" class="alert alert-error"></div>
-
-        <form id="register-form">
-            <div class="form-group">
-                <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" class="form-control" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="user@example.com" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Create Access Key</label>
-                <input type="password" id="password" class="form-control" placeholder="******" required minlength="6">
-            </div>
-            <button type="submit" class="btn-primary">Register Identity</button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Already verified? <a href="login.html">Login</a></p>
-        </div>
+  <div class="auth-container">
+    <div class="auth-header">
+      <h2>Create Account</h2>
     </div>
 
-    <script src="js/auth.js"></script>
+    <form id="registerForm">
+      <div class="form-group">
+        <input type="text" id="name" class="form-control" placeholder="Full Name" required />
+      </div>
+      <div class="form-group">
+        <input type="email" id="email" class="form-control" placeholder="Email" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="password" class="form-control" placeholder="Password" required />
+      </div>
+      <button type="submit" class="btn-primary">Register</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <script src="js/register-logic.js"></script>
 </body>
 </html>

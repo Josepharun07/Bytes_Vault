@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Bytes Vault</title>
+    <title>Admin Dashboard | Bytes Vault</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,6 +16,9 @@
                 <p>Welcome, <span id="admin-name">Admin</span></p>
             </div>
             <div>
+                <!-- NEW BUTTON HERE -->
+                <a href="admin-orders.html" class="btn-primary" style="text-decoration:none; margin-right: 10px;">Manage Orders</a>
+                
                 <button id="add-product-btn" class="btn-primary">+ Add New Item</button>
                 <button id="logout-btn" class="btn-secondary">Logout</button>
             </div>
@@ -41,7 +44,7 @@
         </div>
     </div>
 
-    <!-- Add Product Modal (Hidden by default) -->
+    <!-- Add Product Modal -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -102,13 +105,15 @@
                     <div id="specs-container" style="margin-bottom: 10px; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
                         <!-- JS will add inputs here -->
                     </div>
-                    <button type="button" id="add-spec-btn" class="btn-secondary" style="font-size: 0.9rem; width: auto;">+ Add Spec Row</button>                </div>
+                    <button type="button" id="add-spec-btn" class="btn-secondary" style="font-size: 0.9rem; width: auto;">+ Add Spec Row</button>
+                </div>
 
                 <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save to Database</button>
             </form>
         </div>
     </div>
 
+    <!-- LINK TO EXTERNAL FILE (Fixes CSP Error) -->
     <script src="js/admin.js"></script>
 </body>
 </html>

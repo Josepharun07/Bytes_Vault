@@ -12,23 +12,35 @@ const generateSessionToken = (id) => {
 
 // @desc    Register a new member
 // @route   POST /api/auth/register
+// controllers/authController.js
+
 exports.registerNewMember = async (req, res) => {
   try {
+    console.log("1. Registration Request Received:", req.body.email); // <--- LOG
+
     const { fullName, email, password, role } = req.body;
 
-    // 1. Encryption
     const saltRounds = await bcrypt.genSalt(10);
     const encryptedKey = await bcrypt.hash(password, saltRounds);
 
-    // 2. Persistence
+    // Explicitly check if user exists first to give better logging
+    const existingUser = await User.findOne({ emailAddress: email });
+    if (existingUser) {
+      console.log("2. User already exists in DB"); // <--- LOG
+      return res
+        .status(400)
+        .json({ success: false, message: "Email already registered" });
+    }
+
     const newMember = await User.create({
       fullName,
       emailAddress: email,
       accessKey: encryptedKey,
-      privilegeLevel: role || "customer", // Default to customer
+      privilegeLevel: role || "customer",
     });
 
-    // 3. Token Generation
+    console.log("3. User Saved to MongoDB with ID:", newMember._id); // <--- LOG
+
     const sessionToken = generateSessionToken(newMember._id);
 
     res.status(201).json({
@@ -41,14 +53,11 @@ exports.registerNewMember = async (req, res) => {
       },
     });
   } catch (err) {
-    // Handle Duplicate Email Error (MongoDB code 11000)
+    console.error("❌ Registration Error:", err); // <--- LOG
     if (err.code === 11000) {
       return res
         .status(400)
-        .json({
-          success: false,
-          message: "Email is already registered in the vault.",
-        });
+        .json({ success: false, message: "Email is already registered." });
     }
     res.status(500).json({ success: false, message: err.message });
   }
