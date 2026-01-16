@@ -111,6 +111,7 @@ Clone the repo and install dependencies:
 git clone https://github.com/Josepharun07/Bytes_Vault.git
 cd Bytes_Vault
 npm install
+```
 
 ### 2. Environment Configuration
 Create a `.env` file in the root:
@@ -119,21 +120,21 @@ PORT=3000
 NODE_ENV=development
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
-
+```
 ### 3. Running the Server
 
 ```bash
 # Run in development mode (with Nodemon)
 npm run dev
 Server will start at http://localhost:3000
-
+```
 ### 4. Running Tests
 To verify the system integrity (Auth flow, Database connections, API responses):
 
 ```bash
 # Runs the full Mocha test suite
 npm test
-
+```
 
 ## 🧪 Testing Strategy
 
