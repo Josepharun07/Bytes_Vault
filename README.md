@@ -73,6 +73,9 @@ The project follows a strict **MVC (Model-View-Controller)** pattern.
 │   ├── product.test.js      # Unit tests for Inventory
 │   └── full_system.test.js  # End-to-End Integration tests
 └── server.js            # Entry Point & Server Config
+
+```
+
 ## 🛣️ API Documentation
 
 ### Authentication Module
