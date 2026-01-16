@@ -73,56 +73,76 @@ The project follows a strict **MVC (Model-View-Controller)** pattern.
 │   ├── product.test.js      # Unit tests for Inventory
 │   └── full_system.test.js  # End-to-End Integration tests
 └── server.js            # Entry Point & Server Config
-🛣️ API Documentation
-Authentication Module
-Method	Endpoint	Access	Payload	Description
-POST	/api/auth/register	Public	{fullName, email, password}	Creates a new user.
-POST	/api/auth/login	Public	{email, password}	Returns JWT Token & Role.
-Product Module
-Method	Endpoint	Access	Query Params	Description
-GET	/api/products	Public	?search=name&category=type	Fetches filtered catalog.
-POST	/api/products	Admin	FormData (File + Fields)	Creates item with Image.
-DELETE	/api/products/:id	Admin	None	Removes an item.
-🖥️ UI Page Map
-index.html: Landing page featuring a Hero banner and "New Arrivals".
-shop.html: The main catalog. Contains the Sidebar (Categories) and Search Bar. Uses shop.js to dynamically fetch and render product cards.
-product.html: Detailed view. Reads ?id=XYZ from the URL, fetches that specific ID from the API, and renders specs/reviews.
-dashboard.html: (Admin Only). Protected by JS Logic. Allows uploading new items via a Modal and viewing the inventory table.
-login.html / register.html: Forms for user access.
-⚙️ Setup Instructions
-1. Installation
+## 🛣️ API Documentation
+
+### Authentication Module
+| Method | Endpoint | Access | Payload | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Public | `{fullName, email, password}` | Creates a new user. |
+| **POST** | `/api/auth/login` | Public | `{email, password}` | Returns JWT Token & Role. |
+
+### Product Module
+| Method | Endpoint | Access | Query Params | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | `/api/products` | Public | `?search=name&category=type` | Fetches filtered catalog. |
+| **POST** | `/api/products` | Admin | FormData (File + Fields) | Creates item with Image. |
+| **DELETE** | `/api/products/:id` | Admin | None | Removes an item. |
+
+---
+
+## 🖥️ UI Page Map
+
+*   **index.html:** Landing page featuring a Hero banner and "New Arrivals".
+*   **shop.html:** The main catalog. Contains the Sidebar (Categories) and Search Bar. Uses `shop.js` to dynamically fetch and render product cards.
+*   **product.html:** Detailed view. Reads `?id=XYZ` from the URL, fetches that specific ID from the API, and renders specs/reviews.
+*   **dashboard.html:** (Admin Only). Protected by JS Logic. Allows uploading new items via a Modal and viewing the inventory table.
+*   **login.html / register.html:** Forms for user access.
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Installation
 Clone the repo and install dependencies:
-code
-Bash
-git clone <repository-url>
+```bash
+git clone <repository-url> //add url
 cd Bytes_Vault
 npm install
-2. Environment Configuration
-Create a .env file in the root:
-code
-Properties
+
+### 2. Environment Configuration
+Create a `.env` file in the root:
+```properties
 PORT=3000
 NODE_ENV=development
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_super_secret_key
-3. Running the Server
-code
-Bash
+
+### 3. Running the Server
+
+```bash
 # Run in development mode (with Nodemon)
 npm run dev
 Server will start at http://localhost:3000
-4. Running Tests
+
+### 4. Running Tests
 To verify the system integrity (Auth flow, Database connections, API responses):
-code
-Bash
+
+```bash
 # Runs the full Mocha test suite
 npm test
-🧪 Testing Strategy
+
+
+## 🧪 Testing Strategy
+
 We utilize Automated Integration Testing to simulate real user journeys without manual input.
-Tools: Mocha (Runner), Chai (Assertions), Supertest (HTTP Requests).
-Coverage:
-Admin Registration & Product Upload.
-Customer Registration & Login.
-Catalog Browsing & Filtering.
-Error handling (Duplicate emails, Missing fields).
-Developed by the Bytes Vault Team for SIT725.
+
+*   **Tools:** Mocha (Runner), Chai (Assertions), Supertest (HTTP Requests).
+*   **Coverage:**
+    *   Admin Registration & Product Upload.
+    *   Customer Registration & Login.
+    *   Catalog Browsing & Filtering.
+    *   Error handling (Duplicate emails, Missing fields).
+
+---
+
+**Developed by the Bytes Vault Team for SIT725.**
