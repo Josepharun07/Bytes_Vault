@@ -1,0 +1,54 @@
+<!-- public/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">Bytes Vault</a>
+        <div class="nav-links">
+            <a href="shop.html">Shop</a>
+            <a href="cart.html">Cart</a>
+            <button id="logout-btn" style="background:none; border:none; color:#ddd; cursor:pointer; font-size:1rem; margin-left:15px;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="admin-container" style="margin-top: 2rem;">
+        <div class="dashboard-header">
+            <div>
+                <h1>My Account</h1>
+                <p>Welcome back, <span id="user-name" style="font-weight:bold;">User</span></p>
+            </div>
+        </div>
+
+        <div style="background: white; padding: 2rem; border-radius: 8px; margin-top: 1rem;">
+            <h3>Order History</h3>
+            
+            <div class="table-responsive" style="margin-top: 1rem;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-history-body">
+                        <!-- JS Injects Rows Here -->
+                        <tr><td colspan="5">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -28,18 +28,19 @@
         </ul>
       </div>
   </div>
+<!-- ADD THIS LINE ABOVE THE OTHER SCRIPT -->
+    <script src="js/cart.js"></script> 
 
-  <script>
+    <script>
     const id = new URLSearchParams(window.location.search).get("id");
+    let currentProduct = null; // Store product data globally for cart
 
     async function loadProduct() {
       if(!id) return;
 
       try {
-        const res = await fetch(`/api/products`); // We fetch all and filter in JS for simplicity, or implement /api/products/:id
+        const res = await fetch(`/api/products`);
         const result = await res.json();
-        
-        // Find specific product (Optimized: In production, backend should support /:id)
         const product = result.data.find(p => p._id === id);
 
         if (!product) {
@@ -47,12 +48,13 @@
             return;
         }
 
+        currentProduct = product; // Save for Cart
+
         const imgUrl = product.imageUrl || 'uploads/products/no-image.jpg';
 
-        // Render Specs
+        // Specs Logic
         let specsHtml = '';
         if (product.specs) {
-            // Handle if specs is a Map or Object
             const entries = product.specs instanceof Map ? Object.fromEntries(product.specs) : product.specs;
             specsHtml = Object.entries(entries).map(
                 ([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`
@@ -73,11 +75,17 @@
             <h4>Technical Specifications:</h4>
             <ul>${specsHtml}</ul>
             
-            <button class="btn-primary" style="margin-top: 2rem;">Add to Cart</button>
+            <!-- CHANGED: Add ID and onClick handler -->
+            <button id="add-to-cart-btn" class="btn-primary" style="margin-top: 2rem;">Add to Cart</button>
           </div>
         `;
 
-        // Render Reviews (Check if reviews exist)
+        // Attach Listener
+        document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+            Cart.add(currentProduct);
+        });
+
+        // Reviews Logic... (Existing code)
         const reviews = product.reviews || [];
         if (reviews.length > 0) {
             document.getElementById("reviews-list").innerHTML =
@@ -92,6 +100,7 @@
     }
 
     loadProduct();
-  </script>
+    </script>
+  <script src="js/cart.js"></script>
 </body>
 </html>

@@ -126,8 +126,9 @@ JWT_SECRET=your_super_secret_key
 ```bash
 # Run in development mode (with Nodemon)
 npm run dev
-Server will start at http://localhost:3000
 ```
+Server will start at http://localhost:3000
+
 ### 4. Running Tests
 To verify the system integrity (Auth flow, Database connections, API responses):
 

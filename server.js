@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const initiateDataLayer = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+
 
 // Initialize App
 const vaultApp = express();
@@ -36,7 +38,8 @@ vaultApp.get('/api/health', (req, res) => {
 });
 
 vaultApp.use('/api/auth', require('./routes/authRoutes'));
-vaultApp.use('/api/products', productRoutes);
+vaultApp.use('/api/products', require('./routes/productRoutes'));
+vaultApp.use('/api/orders', orderRoutes);
 
 // 5. Global Error Handler
 vaultApp.use((err, req, res, next) => {

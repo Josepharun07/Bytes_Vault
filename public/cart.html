@@ -1,0 +1,57 @@
+<!-- public/cart.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">Bytes Vault</a>
+        <div class="nav-links">
+            <a href="shop.html">Continue Shopping</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <div class="admin-container" style="margin-top: 2rem;">
+        <h1>Shopping Cart</h1>
+        
+        <!-- Cart Table -->
+        <div class="table-responsive" style="margin-top: 1rem;">
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-body">
+                    <!-- JS Injects Rows Here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary & Checkout -->
+        <div id="cart-summary" style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; text-align: right; display:none;">
+            <p>Subtotal: <span id="subtotal" style="font-weight:bold;">$0.00</span></p>
+            <p>Tax (10%): <span id="tax">$0.00</span></p>
+            <hr style="margin: 1rem 0; border-top: 1px solid #eee;">
+            <h2 style="color: var(--vault-blue);">Total: <span id="grand-total">$0.00</span></h2>
+            
+            <button onclick="window.location.href='checkout.html'" class="btn-primary" style="margin-top: 1rem; width: auto; font-size: 1.1rem;">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <script src="js/cart.js"></script>
+</body>
+</html>

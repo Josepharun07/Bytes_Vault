@@ -44,3 +44,36 @@ exports.updateUserRole = async (req, res, next) => {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
+
+// @desc    Get ALL orders (Admin only)
+// @route   GET /api/orders/admin/all
+exports.getAllOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({})
+            .populate('user', 'id fullName email') // Get buyer details
+            .sort({ createdAt: -1 }); // Newest first
+            
+        res.status(200).json({ success: true, data: orders });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// @desc    Update order status
+// @route   PUT /api/orders/:id/status
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        order.status = req.body.status;
+        await order.save();
+
+        res.status(200).json({ success: true, message: 'Order updated', order });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
