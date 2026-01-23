@@ -1,6 +1,6 @@
 # Bytes Vault - E-Commerce & Inventory Management System
 
-**Bytes Vault** is a state-of-the-art, full-stack E-Commerce and Inventory Management platform. Built using a strict **"Vanilla" Tech Stack** (No Frontend Frameworks like React or Vue), it demonstrates advanced software engineering principles, robust REST API design, and a scalable MVC architecture.
+**Bytes Vault** is a state-of-the-art, full-stack E-Commerce and Inventory Management platform. Built using Vanilla Tech Stack, it demonstrates advanced software engineering principles, robust REST API design, and a scalable MVC architecture.
 
 ---
 
