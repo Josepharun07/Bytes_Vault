@@ -3,11 +3,12 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// Helper to sign JWT
+// Helper Function to sign JWT with basic validation
 const generateSessionToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "24h", // Session lasts 1 day
-  });
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET not configured");
+  const expiresIn = process.env.JWT_EXPIRES_IN || "24h";
+  return jwt.sign({ id }, secret, { expiresIn });
 };
 
 // @desc    Register a new member
