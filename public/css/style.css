@@ -470,3 +470,134 @@ th {
     position: relative;
     z-index: 100001;
 }
+
+
+/* --- PRODUCT DETAILS & REVIEWS (Teammate Integration) --- */
+
+:root {
+  --star-gold: #fbbf24;
+  --vault-light-gray: #f9fafb;
+  --vault-border: #e5e7eb;
+}
+
+/* Container fixes */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Product Section Layout */
+.product-section {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Image Side */
+.product-image-section {
+  background: #f8f9fa;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.product-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Stock Badges */
+.stock-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 10;
+}
+.in-stock { background: #d1fae5; color: #065f46; }
+.low-stock { background: #fef3c7; color: #92400e; }
+.out-of-stock { background: #fee2e2; color: #991b1b; }
+
+/* Info Side */
+.product-info-section { padding: 3rem; }
+
+.product-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--vault-text);
+}
+
+.product-price {
+  font-size: 2rem;
+  color: var(--vault-blue);
+  font-weight: 700;
+  margin: 1rem 0;
+}
+
+.stars { color: var(--star-gold); letter-spacing: 2px; }
+
+.specs-grid {
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--vault-light-gray);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.spec-label { font-weight: 600; }
+
+/* Reviews Section */
+.reviews-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-top: 2rem;
+}
+
+.review-item {
+  border-bottom: 1px solid var(--vault-border);
+  padding: 1.5rem 0;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.reviewer-name { font-weight: bold; }
+.review-date { color: #888; font-size: 0.8rem; }
+
+.login-prompt {
+  text-align: center;
+  padding: 2rem;
+  background: var(--vault-light-gray);
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .product-section { grid-template-columns: 1fr; }
+  .product-info-section { padding: 1.5rem; }
+}
