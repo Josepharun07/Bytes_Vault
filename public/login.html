@@ -2,37 +2,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Bytes Vault</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <title>Login | Bytes Vault</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-header">
-            <h1>Bytes Vault</h1>
-            <p>Secure Access Portal</p>
-        </div>
-
-        <div id="error-message" class="alert alert-error"></div>
-
-        <form id="login-form">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" class="form-control" placeholder="user@example.com" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Access Key (Password)</label>
-                <input type="password" id="password" class="form-control" placeholder="******" required>
-            </div>
-            <button type="submit" class="btn-primary">Authenticate</button>
-        </form>
-
-        <div class="auth-footer">
-            <p>New member? <a href="register.html">Register Identity</a></p>
-        </div>
+  <div class="auth-container">
+    <div class="auth-header">
+      <h2>Login</h2>
     </div>
 
-    <script src="js/auth.js"></script>
+    <form id="loginForm">
+      <div class="form-group">
+        <input type="email" id="email" class="form-control" placeholder="Email" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="password" class="form-control" placeholder="Password" required />
+      </div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>No account? <a href="register.html">Register</a></p>
+    </div>
+  </div>
+
+  <script src="js/login-logic.js"></script>
 </body>
 </html>

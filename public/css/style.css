@@ -94,3 +94,510 @@ body {
     background-color: #f8d7da;
     color: #721c24;
 }
+
+
+/* Dashboard Layout */
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    width: 100%;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Data Table */
+.table-responsive {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: var(--vault-gray);
+    font-weight: 600;
+}
+
+.product-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.stock-low {
+    background-color: #fff3cd; /* Yellow warning for low stock */
+    color: #856404;
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    right: 1.5rem;
+    top: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-modal:hover { color: #000; }
+
+.btn-danger {
+    background-color: var(--vault-danger);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+/* Navbar */
+.navbar {
+    background-color: var(--vault-dark);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--vault-blue);
+}
+
+.nav-links a {
+    color: #ddd;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover { color: white; }
+
+/* Shop Layout */
+.shop-container {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Sidebar | Grid */
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Sidebar Filters */
+.filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    height: fit-content;
+}
+
+.filter-group { margin-bottom: 1.5rem; }
+.filter-group h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Product Card */
+.product-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 1px solid #eee;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+
+.card-body { padding: 1rem; }
+
+.card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--vault-text);
+}
+
+.card-price {
+    color: var(--vault-blue);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    background: #eee;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .shop-container { grid-template-columns: 1fr; } /* Stack filters on top */
+}
+
+
+
+/* Fix for Dynamic Specs Container */
+#specs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    max-height: 200px; /* Prevent it from getting too long */
+    overflow-y: auto;  /* Scroll if too many specs */
+}
+
+.spec-row {
+    display: flex; /* Use Flex instead of Grid for better click targets */
+    gap: 10px;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.spec-row input {
+    flex: 1; /* Inputs take up available space */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Ensure the modal is definitely on top */
+.modal {
+    z-index: 9999 !important;
+}
+
+/* --- ADMIN SUITE LAYOUT --- */
+.admin-wrapper {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Sidebar | Content */
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--vault-dark);
+    color: white;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    color: var(--vault-blue);
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.nav-item {
+    padding: 1rem;
+    color: #bbb;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Main Content Area */
+.main-content {
+    background-color: #f4f6f9;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Metric Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-info h3 { font-size: 2rem; margin: 0; color: var(--vault-dark); }
+.stat-info p { color: #666; margin: 0; font-size: 0.9rem; }
+.stat-icon { font-size: 2.5rem; opacity: 0.2; }
+
+/* Dashboard Sections */
+.dashboard-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+/* Hidden Sections (for tab switching) */
+.view-section { display: none; }
+.view-section.active { display: block; }
+
+/* --- CRITICAL FIX FOR UNCLICKABLE MODALS --- */
+
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 99999 !important; /* Force it above Sidebar (usually 1000) */
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    backdrop-filter: blur(2px); /* Optional: nice blur effect */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* 10% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px;
+    border-radius: 8px;
+    
+    /* Ensure content accepts clicks */
+    position: relative;
+    z-index: 100000 !important; 
+    pointer-events: auto; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Ensure inputs inside modal are always clickable */
+.modal-content input, 
+.modal-content select, 
+.modal-content button {
+    position: relative;
+    z-index: 100001;
+}
+
+
+/* --- PRODUCT DETAILS & REVIEWS (Teammate Integration) --- */
+
+:root {
+  --star-gold: #fbbf24;
+  --vault-light-gray: #f9fafb;
+  --vault-border: #e5e7eb;
+}
+
+/* Container fixes */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Product Section Layout */
+.product-section {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Image Side */
+.product-image-section {
+  background: #f8f9fa;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.product-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Stock Badges */
+.stock-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 10;
+}
+.in-stock { background: #d1fae5; color: #065f46; }
+.low-stock { background: #fef3c7; color: #92400e; }
+.out-of-stock { background: #fee2e2; color: #991b1b; }
+
+/* Info Side */
+.product-info-section { padding: 3rem; }
+
+.product-title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--vault-text);
+}
+
+.product-price {
+  font-size: 2rem;
+  color: var(--vault-blue);
+  font-weight: 700;
+  margin: 1rem 0;
+}
+
+.stars { color: var(--star-gold); letter-spacing: 2px; }
+
+.specs-grid {
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--vault-light-gray);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.spec-label { font-weight: 600; }
+
+/* Reviews Section */
+.reviews-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-top: 2rem;
+}
+
+.review-item {
+  border-bottom: 1px solid var(--vault-border);
+  padding: 1.5rem 0;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.reviewer-name { font-weight: bold; }
+.review-date { color: #888; font-size: 0.8rem; }
+
+.login-prompt {
+  text-align: center;
+  padding: 2rem;
+  background: var(--vault-light-gray);
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .product-section { grid-template-columns: 1fr; }
+  .product-info-section { padding: 1.5rem; }
+}

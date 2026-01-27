@@ -1,16 +1,16 @@
+// routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
-const { getUsers, updateUserRole } = require('../controllers/userController');
-const { verifyAuthenticationToken, authorizeSuperAdmin, authorizeAdmin } = require('../middleware/authMiddleware');
+const { getAllUsers, updateUserRole, createUser, deleteUser, resetUserPassword } = require('../controllers/userController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-// Protect all routes
-router.use(verifyAuthenticationToken);
+router.use(protect);
+router.use(admin);
 
-// Get Users - Allow Admin or SuperAdmin (requirement says "users given permission by the super")
-// We will allow 'admin' and 'superadmin' to VIEW users.
-router.get('/', authorizeAdmin, getUsers);
-
-// Update Role - ONLY Super Admin (requirement: "only the super user can do this")
-router.put('/:id/role', authorizeSuperAdmin, updateUserRole);
+router.get('/', getAllUsers);
+router.post('/', createUser); // Create
+router.put('/:id/role', updateUserRole);
+router.delete('/:id', deleteUser); // Delete
+router.put('/:id/password', resetUserPassword); // Reset Pass
 
 module.exports = router;

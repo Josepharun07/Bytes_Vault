@@ -4,7 +4,7 @@ const router = express.Router();
 const { getMyOrders } = require('../controllers/orderController');
 const { verifyAuthenticationToken } = require('../middleware/authMiddleware');
 
-// protect route
+// Protect route
 router.use(verifyAuthenticationToken);
 
 // GET /api/orders/mine

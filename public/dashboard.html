@@ -1,159 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Bytes Vault</title>
+    <title>Admin Suite | Bytes Vault</title>
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        body {
-            display: block;
-            background-color: #2c3e50;
-        }
-
-        .dashboard-header {
-            background-color: #343a40;
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dashboard-header h1 {
-            font-size: 1.5rem;
-        }
-
-        .dashboard-content {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 0.75rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        th {
-            background-color: #f8f9fa;
-        }
-
-        .btn-small {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-right: 5px;
-        }
-
-        .btn-edit {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-promote {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-demote {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        #productForm {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        #productForm .form-group {
-            flex: 1 1 200px;
-        }
-
-        #productForm .fullwidth {
-            flex-basis: 100%;
-        }
-
-        .alert {
-            display: none;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 4px;
-        }
-
-        .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-        }
-    </style>
 </head>
+<body style="display: block;">
 
-<body>
-    <header class="dashboard-header">
-        <h1>Bytes Vault Admin</h1>
-        <button id="logoutBtn" class="btn btn-small" style="background: #dc3545; color: white;">Logout</button>
-    </header>
+    <div class="admin-wrapper">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h2>Bytes Vault</h2>
+            <div style="font-size:0.8rem; color:#666; padding-left:1rem; margin-bottom:1rem;">MANAGEMENT</div>
+            
+            <a onclick="switchView('dashboard')" class="nav-item active" id="nav-dashboard">
+                <span>📊</span> Dashboard
+            </a>
+            <a onclick="switchView('inventory')" class="nav-item" id="nav-inventory">
+                <span>📦</span> Inventory
+            </a>
+            <a onclick="switchView('orders')" class="nav-item" id="nav-orders">
+                <span>🚚</span> Orders
+            </a>
+            <a onclick="switchView('users')" class="nav-item" id="nav-users">
+                <span>👥</span> Users
+            </a>
+            
+            <div style="margin-top: auto;">
+                <a id="logout-btn" class="nav-item" style="color: var(--vault-danger);">
+                    <span>🚪</span> Logout
+                </a>
+            </div>
+        </aside>
 
-    <div class="dashboard-content">
-        <div id="alertBox" class="alert"></div>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <h2 id="page-title" style="margin-bottom: 2rem;">Overview</h2>
 
-        <!-- Product Management -->
-        <div class="card">
-            <h2 id="formTitle">Add New Product</h2>
-            <form id="productForm">
-                <input type="hidden" id="productId">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="productName" required>
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div><h3 id="stat-revenue">$0.00</h3><p>Revenue</p></div>
+                        <div class="stat-icon" style="color:green">💰</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><h3 id="stat-orders">0</h3><p>Orders</p></div>
+                        <div class="stat-icon" style="color:blue">🛒</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><h3 id="stat-users">0</h3><p>Users</p></div>
+                        <div class="stat-icon" style="color:orange">👥</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Price</label>
-                    <input type="number" id="productPrice" step="0.01" required>
+                <div class="dashboard-section">
+                    <h3>⚠️ Low Stock Alerts</h3>
+                    <ul id="low-stock-list"></ul>
                 </div>
-                <div class="form-group">
-                    <label>Stock</label>
-                    <input type="number" id="productStock" required>
+            </section>
+
+            <!-- 2. INVENTORY VIEW -->
+            <section id="view-inventory" class="view-section">
+                <div class="dashboard-header">
+                    <h3>Products</h3>
+                    <button id="add-product-btn" class="btn-primary">+ Add Product</button>
                 </div>
+                <div class="table-responsive">
+                    <table id="inventory-table">
+                        <thead><tr><th>Img</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. ORDERS VIEW (Integrated) -->
+            <section id="view-orders" class="view-section">
+                <div class="dashboard-header">
+                    <h3>All Orders</h3>
+                </div>
+                <div class="table-responsive">
+                    <table id="orders-table">
+                        <thead><tr><th>ID</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Update</th></tr></thead>
+                        <tbody id="orders-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. USERS VIEW (New) -->
+            <section id="view-users" class="view-section">
+                <div class="dashboard-header">
+                    <h3>User Directory</h3>
+                    <button onclick="openUserModal()" class="btn-primary">+ Create User</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="users-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Registered</th><th>Actions</th></tr></thead>
+                        <tbody id="users-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD PRODUCT -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('product-modal')">&times;</span>
+            <h2>Add to Catalog</h2>
+            <form id="add-product-form" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label>Product Image</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <!-- Will be auto-filled by JS -->
+                        <input type="text" name="sku" class="form-control" placeholder="Auto-Generated" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" class="form-control">
+                            <option value="GPU">GPU</option>
+                            <option value="CPU">CPU</option>
+                            <option value="Motherboard">Motherboard</option>
+                            <option value="RAM">RAM</option>
+                            <option value="Storage">Storage</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Peripheral">Peripheral</option>
+                            <option value="Console">Console</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" name="price" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Count</label>
+                        <input type="number" name="stock" class="form-control" required>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Description</label>
-                    <input type="text" id="productDescription">
+                    <textarea name="description" class="form-control" rows="3" required></textarea>
                 </div>
+
+                <!-- RESTORED: DYNAMIC SPECS CONTAINER -->
                 <div class="form-group">
+<<<<<<< HEAD
                     <label>Image URL</label>
                     <input type="file" id="productImage" accept="image/*">
                 </div>
@@ -161,59 +170,56 @@
                     <button type="submit" class="btn">Save Product</button>
                     <button type="button" id="cancelEdit" class="btn"
                         style="background:#6c757d; display:none;">Cancel</button>
+=======
+                    <label>Technical Specifications</label>
+                    <div id="specs-container" style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;">
+                        <!-- JS will add inputs here -->
+                    </div>
+                    <button type="button" id="add-spec-btn" class="btn-secondary" style="width: auto; font-size: 0.8rem;">+ Add Spec Row</button>
+>>>>>>> 9b36a491bd2cdba5b6331e364c4a4f71ad239670
                 </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 1rem;">Save Product</button>
             </form>
-        </div>
-
-        <div class="card">
-            <h2>Product Inventory</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- Admin Management (Super Admin Only) -->
-        <div class="card" id="adminManagementSection" style="display:none;">
-            <h2>Admin Management</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Dept</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- User Management -->
-        <div class="card" id="userManagementSection" style="display:none;">
-            <h2>User Management</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody"></tbody>
-            </table>
         </div>
     </div>
 
-    <script src="js/dashboard.js"></script>
-</body>
+    <!-- MODAL: CREATE USER -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-modal" onclick="closeModal('user-modal')">&times;</span>
+            <h2>Create User</h2>
+            <form id="create-user-form">
+                <div class="form-group"><label>Name</label><input type="text" id="new-name" class="form-control" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="new-email" class="form-control" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="new-pass" class="form-control" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="new-role" class="form-control">
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Create User</button>
+            </form>
+        </div>
+    </div>
 
+    <!-- MODAL: RESET PASSWORD -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close-modal" onclick="closeModal('password-modal')">&times;</span>
+            <h2>Reset Password</h2>
+            <form id="reset-pass-form">
+                <input type="hidden" id="reset-user-id">
+                <p>Resetting password for: <b id="reset-user-email"></b></p>
+                <div class="form-group">
+                    <input type="password" id="reset-new-pass" class="form-control" placeholder="New Password" required>
+                </div>
+                <button type="submit" class="btn-danger">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
 </html>

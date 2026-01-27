@@ -5,7 +5,21 @@ const Product = require('../models/Product');
 // @access  Public
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 });
+        const { category, search } = req.query;
+        let query = {};
+
+        // Filter by Category
+        if (category && category !== 'All') {
+            query.category = category;
+        }
+
+        // Search by Name
+        if (search && search.trim() !== '') {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        const products = await Product.find(query).sort({ createdAt: -1 });
+
         res.status(200).json({
             success: true,
             count: products.length,
