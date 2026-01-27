@@ -1,106 +1,62 @@
-<!-- public/product.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Details | Bytes Vault</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   
-  <nav class="navbar">
-      <a href="index.html" class="nav-brand">Bytes Vault</a>
-      <div class="nav-links">
-          <a href="shop.html">Back to Shop</a>
-      </div>
-  </nav>
+    <!-- Updated Navbar -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">Bytes Vault</a>
+        <div class="nav-menu">
+            <a href="shop.html" class="nav-link">Shop</a>
+            <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="badge" style="background:var(--primary); color:white; margin-left:5px;">(0)</span></a>
+            <a href="login.html" id="auth-link" class="nav-btn">Login</a>
+        </div>
+    </nav>
 
-  <div class="admin-container" style="margin-top: 2rem;">
-      <div id="product-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; background: white; padding: 2rem; border-radius: 8px;">
-          <!-- Content injected by JS -->
-      </div>
+    <!-- Main Content -->
+    <div class="container" style="padding-top: 2rem;">
+        
+        <!-- Breadcrumb -->
+        <div style="margin-bottom: 1.5rem;">
+            <a href="shop.html" class="btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem;">
+                &larr; Back to Catalog
+            </a>
+        </div>
 
-      <div style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px;">
-        <h3>Customer Reviews</h3>
-        <ul id="reviews-list" style="margin-top: 1rem; padding-left: 1.5rem;">
-            <!-- Reviews injected here -->
-        </ul>
-      </div>
-  </div>
-<!-- ADD THIS LINE ABOVE THE OTHER SCRIPT -->
+        <!-- Product Details Grid -->
+        <!-- JS injects .product-image-section and .product-info-section here -->
+        <div id="product-container" class="product-section">
+            <div style="padding: 4rem; text-align: center; width: 100%; grid-column: 1 / -1;">
+                <p style="color: var(--text-muted);">Loading product details...</p>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Customer Reviews</h3>
+            
+            <!-- Reviews List -->
+            <ul id="reviews-list" style="list-style: none; padding: 0;">
+                <li style="color: var(--text-muted); font-style: italic;">Loading reviews...</li>
+            </ul>
+
+            <!-- Add Review Form Area -->
+            <div id="review-form-wrapper" style="margin-top: 2rem; border-top: 1px solid var(--text-muted); padding-top: 2rem; border-color: #e2e8f0;">
+                <!-- JS injects form or login prompt here -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/loaders.js"></script>
     <script src="js/cart.js"></script> 
-
-    <script>
-    const id = new URLSearchParams(window.location.search).get("id");
-    let currentProduct = null; // Store product data globally for cart
-
-    async function loadProduct() {
-      if(!id) return;
-
-      try {
-        const res = await fetch(`/api/products`);
-        const result = await res.json();
-        const product = result.data.find(p => p._id === id);
-
-        if (!product) {
-            document.body.innerHTML = "<h2>Product not found</h2>";
-            return;
-        }
-
-        currentProduct = product; // Save for Cart
-
-        const imgUrl = product.imageUrl || 'uploads/products/no-image.jpg';
-
-        // Specs Logic
-        let specsHtml = '';
-        if (product.specs) {
-            const entries = product.specs instanceof Map ? Object.fromEntries(product.specs) : product.specs;
-            specsHtml = Object.entries(entries).map(
-                ([k, v]) => `<li><strong>${k}:</strong> ${v}</li>`
-            ).join("");
-        }
-
-        document.getElementById("product-container").innerHTML = `
-          <div>
-            <img src="${imgUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #eee;"/>
-          </div>
-          <div>
-            <h1 style="color:var(--vault-text)">${product.itemName}</h1>
-            <h2 style="color:var(--vault-blue); margin: 0.5rem 0;">$${product.price}</h2>
-            <p><strong>Stock:</strong> ${product.stockCount} units</p>
-            <p style="margin: 1rem 0; color: #666;">${product.description}</p>
-            
-            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
-            <h4>Technical Specifications:</h4>
-            <ul>${specsHtml}</ul>
-            
-            <!-- CHANGED: Add ID and onClick handler -->
-            <button id="add-to-cart-btn" class="btn-primary" style="margin-top: 2rem;">Add to Cart</button>
-          </div>
-        `;
-
-        // Attach Listener
-        document.getElementById('add-to-cart-btn').addEventListener('click', () => {
-            Cart.add(currentProduct);
-        });
-
-        // Reviews Logic... (Existing code)
-        const reviews = product.reviews || [];
-        if (reviews.length > 0) {
-            document.getElementById("reviews-list").innerHTML =
-                reviews.map(r => `<li><strong>${r.user}:</strong> ${r.comment}</li>`).join("");
-        } else {
-            document.getElementById("reviews-list").innerHTML = "<p>No reviews yet.</p>";
-        }
-
-      } catch (err) {
-          console.error(err);
-      }
-    }
-
-    loadProduct();
-    </script>
-  <script src="js/cart.js"></script>
+    <script src="js/product.js"></script>
 </body>
 </html>
