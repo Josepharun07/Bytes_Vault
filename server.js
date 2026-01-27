@@ -1,52 +1,60 @@
+// server.js
+require('dotenv').config();
 const express = require('express');
-const dotenv = require('dotenv');
+const path = require('path');
 const morgan = require('morgan');
 const helmet = require('helmet');
-const cors = require('cors');
-const path = require('path');
-const connectDB = require('./config/db');
-
-// Load environment variables
-dotenv.config();
-
-// Connect to database
-connectDB();
-
-// Initialize Express
-const app = express();
-
-// Middleware
-app.use(express.json()); // Body parser
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
-app.use(morgan('dev')); // Logging
-
-// Mount Routers
-app.use('/api/auth', require('./routes/authRoutes')); // User Auth
-app.use('/api/admins', require('./routes/adminRoutes')); // Admin Auth & Mgmt
-app.use('/api/products', require('./routes/productRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
+const initiateDataLayer = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 
-// Serve static assets from /public folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Initialize App
+const vaultApp = express();
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        success: false,
-        message: 'Server Error',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+// 1. Connect to Database
+initiateDataLayer();
+
+// 2. Middleware Pipeline
+vaultApp.use(express.json()); // Parse JSON bodies
+vaultApp.use(express.urlencoded({ extended: true }));
+vaultApp.use(helmet()); // Security Headers
+vaultApp.use(morgan('dev')); // Logger
+vaultApp.use('/api/auth', authRoutes); 
+
+// 3. Serve Static UI (The Vanilla Frontend)
+// This serves everything in /public as if it were the root
+vaultApp.use(express.static(path.join(__dirname, 'public')));
+
+// 4. Basic Health Check Route
+vaultApp.get('/api/health', (req, res) => {
+    res.status(200).json({ 
+        systemStatus: 'Operational', 
+        timestamp: new Date() 
     });
 });
 
-const PORT = process.env.PORT || 5000;
+vaultApp.use('/api/auth', require('./routes/authRoutes'));
+vaultApp.use('/api/products', productRoutes);
+vaultApp.use('/api/orders', orderRoutes);
+
+// 5. Global Error Handler
+vaultApp.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ 
+        errorType: 'InternalServerError', 
+        message: 'The vault encountered an unexpected issue.' 
+    });
+});
+
+// 6. Server Activation
+const SYSTEM_PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    vaultApp.listen(SYSTEM_PORT, () => {
+        console.log(`🚀 BytesVault Engine running on port ${SYSTEM_PORT}`);
     });
 }
 
-module.exports = app;
+module.exports = vaultApp; // Export for Testingnode

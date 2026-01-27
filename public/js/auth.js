@@ -1,52 +1,89 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const alertInfo = document.getElementById('alertInfo');
+// public/js/auth.js
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+// 1. Selector Constants
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const errorDisplay = document.getElementById('error-message');
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+// 2. Helper to show errors on screen
+const showError = (message) => {
+    errorDisplay.textContent = message;
+    errorDisplay.style.display = 'block';
+    setTimeout(() => {
+        errorDisplay.style.display = 'none';
+    }, 4000);
+};
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
+// 3. Handle Login
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop page reload
 
-                const data = await response.json();
+        const credentialsPayload = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
 
-                if (data.success) {
-                    // Store token in localStorage
-                    localStorage.setItem('token', data.token);
-                    // Redirect to dashboard (or home for now as dashboard.html isn't mandated created yet but requested in structure)
-                    // The prompt "WHAT TO GENERATE" didn't mandate dashboard.html code, but "REQUIRED FOLDER STRUCTURE" mentioned it.
-                    // I will just alert success for now or redirect to index.html if it existed, or just log.
-                    // Prompt says: "On success, store the JWT in localStorage and redirect to the dashboard."
-                    // I'll redirect to dashboard.html even if I haven't created it yet (it will 404 but logic is correct).
-                    window.location.href = 'dashboard.html';
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentialsPayload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Save the "Digital Badge"
+                localStorage.setItem('vault_token', result.token);
+                localStorage.setItem('vault_role', result.role);
+                
+                // Redirect based on role (We will build dashboard later)
+                if (result.role === 'admin') {
+                    window.location.href = '/dashboard.html'; // Admin Panel
                 } else {
-                    showAlert(data.message, 'danger');
+                    window.location.href = '/index.html'; // Shop Home
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('An error occurred. Please try again.', 'danger');
+            } else {
+                showError(result.message);
             }
-        });
-    }
 
-    function showAlert(message, type) {
-        alertInfo.textContent = message;
-        alertInfo.className = `alert alert-${type}`;
-        alertInfo.style.display = 'block';
+        } catch (networkError) {
+            showError('System Unreachable. Check console.');
+            console.error(networkError);
+        }
+    });
+}
 
-        // Hide after 3 seconds
-        setTimeout(() => {
-            alertInfo.style.display = 'none';
-        }, 3000);
-    }
-});
+// 4. Handle Registration
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const newIdentityPayload = {
+            fullName: document.getElementById('fullname').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newIdentityPayload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                localStorage.setItem('vault_token', result.token);
+                alert('Identity Created. Welcome to Bytes Vault.');
+                window.location.href = '/index.html';
+            } else {
+                showError(result.message);
+            }
+        } catch (networkError) {
+            showError('System Unreachable');
+        }
+    });
+}

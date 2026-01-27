@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+
 const {
     getProducts,
     createProduct,
@@ -7,15 +8,14 @@ const {
     deleteProduct,
     addReview,
 } = require('../controllers/productController');
-const upload = require('../middleware/upload');
 
-
+const upload = require('../middleware/uploadMiddleware');
 const { verifyAuthenticationToken, authorizeAdmin } = require('../middleware/authMiddleware');
 
-// Public route to view products
+// Public route
 router.get('/', getProducts);
 
-// Protected Admin routes
+// Protect admin routes
 router.use(verifyAuthenticationToken);
 router.use(authorizeAdmin);
 
