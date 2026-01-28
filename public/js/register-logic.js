@@ -1,45 +1,86 @@
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation(); // Stop other events
+const registerForm = document.getElementById("registerForm");
+const regName = document.getElementById("name");
+const regEmail = document.getElementById("email");
+const regPassword = document.getElementById("password");
+const regErrors = document.getElementById("register-errors");
 
-    const nameVal = document.getElementById('name').value;
-    const emailVal = document.getElementById('email').value;
-    const passVal = document.getElementById('password').value;
-    const submitBtn = document.querySelector('button[type="submit"]');
+const regEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // 1. DISABLE BUTTON (Prevents Double Submit)
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Registering...";
+function regShowErrors(messages) {
+  if (!regErrors) return;
+  regErrors.innerHTML = `<ul>${messages.map((m) => `<li>${m}</li>`).join("")}</ul>`;
+  regErrors.classList.remove("hidden");
+}
 
-    try {
-        console.log("Sending registration request..."); // Debug Log
+function regClearErrors() {
+  if (!regErrors) return;
+  regErrors.innerHTML = "";
+  regErrors.classList.add("hidden");
+}
 
-        const res = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                fullName: nameVal,
-                email: emailVal,
-                password: passVal
-            })
-        });
+function regSetFieldState(inputEl, hasError) {
+  const wrapper = inputEl?.closest(".input-field");
+  if (!wrapper) return;
+  wrapper.classList.toggle("field-error", hasError);
+}
 
-        const data = await res.json();
-        console.log("Server Response:", data); // Debug Log
+registerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  regClearErrors();
+  [regName, regEmail, regPassword].forEach((el) => regSetFieldState(el, false));
 
-        if (res.ok && data.success) {
-            alert("Account created! Redirecting to login...");
-            window.location.href = "/login.html";
-        } else {
-            alert("Error: " + (data.message || "Registration failed"));
-            // Re-enable button if failed
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Register";
-        }
-    } catch (err) {
-        console.error("Network Error:", err);
-        alert("Server Error - Check Console");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Register";
+  const nameVal = regName.value.trim();
+  const emailVal = regEmail.value.trim();
+  const passVal = regPassword.value;
+  const submitBtn = registerForm.querySelector('button[type="submit"]');
+
+  const errors = [];
+  if (nameVal.length < 2) {
+    errors.push("Enter your full name.");
+    regSetFieldState(regName, true);
+  }
+  if (!regEmailPattern.test(emailVal)) {
+    errors.push("Enter a valid email address.");
+    regSetFieldState(regEmail, true);
+  }
+  if (passVal.length < 8) {
+    errors.push("Password must be at least 8 characters.");
+    regSetFieldState(regPassword, true);
+  }
+
+  if (errors.length) {
+    regShowErrors(errors);
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Registering...";
+
+  try {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: nameVal,
+        email: emailVal,
+        password: passVal,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      alert("Account created! Redirecting to login...");
+      window.location.href = "/login.html";
+    } else {
+      regShowErrors([data.message || "Registration failed"]);
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create account";
     }
+  } catch (err) {
+    console.error("Network Error:", err);
+    regShowErrors(["Server Error - Please try again"]);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Create account";
+  }
 });
