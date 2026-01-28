@@ -2,39 +2,58 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Character encoding for correct text rendering -->
     <meta charset="UTF-8" />
+
+    <!-- Ensures responsive layout on mobile and tablets -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Page title shown in browser tab -->
     <title>Catalog - Bytes Vault</title>
+
+    <!-- Global stylesheet for layout and components -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
+
   <body>
+    <!-- Top navigation bar -->
     <nav class="navbar">
+      <!-- Brand logo / homepage link -->
       <a href="index.html" class="nav-brand">Bytes Vault</a>
+
+      <!-- Navigation links -->
       <div class="nav-menu">
+        <!-- Active link for current page -->
         <a href="shop.html" class="nav-link active">Shop</a>
-        <a href="cart.html" class="nav-link"
-          >Cart
-          <span
-            id="cart-count"
-            class="badge"
-            style="background: var(--primary); color: white; margin-left: 6px"
-            >(0)</span
-          ></a
-        >
+
+        <!-- Cart link with dynamic item count -->
+        <a href="cart.html" class="nav-link">
+          Cart
+          <!-- Cart item count updated via JavaScript -->
+          <span id="cart-count" class="badge">(0)</span>
+        </a>
+
+        <!-- Authentication link updated dynamically based on login state -->
         <a href="login.html" id="auth-link" class="nav-btn">Login</a>
       </div>
     </nav>
 
+    <!-- Main shop layout (sidebar + product grid) -->
     <div class="shop-layout">
-      <!-- Sidebar -->
+
+      <!-- Sidebar filter panel -->
       <aside class="filter-panel">
+        <!-- Filter panel header -->
         <div class="filter-panel__header">
           <p class="eyebrow">Filters</p>
           <h3>Browse by category</h3>
           <p class="muted">Tap a pill to narrow the grid.</p>
         </div>
 
+        <!-- Category filter options -->
         <div class="filter-options">
+
+          <!-- All products (default selected) -->
           <label class="pill-option">
             <input
               type="radio"
@@ -45,14 +64,18 @@
             />
             <span>All Products</span>
           </label>
+
+          <!-- Individual category filters -->
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="GPU" />
             <span>GPU</span>
           </label>
+
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="CPU" />
             <span>CPU</span>
           </label>
+
           <label class="pill-option">
             <input
               type="radio"
@@ -62,22 +85,27 @@
             />
             <span>Motherboard</span>
           </label>
+
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="RAM" />
             <span>RAM</span>
           </label>
+
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="Storage" />
             <span>Storage</span>
           </label>
+
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="Laptop" />
             <span>Laptop</span>
           </label>
+
           <label class="pill-option">
             <input type="radio" name="cat" class="cat-filter" value="Monitor" />
             <span>Monitor</span>
           </label>
+
           <label class="pill-option">
             <input
               type="radio"
@@ -90,16 +118,19 @@
         </div>
       </aside>
 
-      <!-- Main Grid -->
+      <!-- Main content area -->
       <main class="shop-grid-wrapper">
+        <!-- Product grid populated dynamically via JavaScript -->
         <div class="product-grid" id="shop-grid">
-          <!-- JS Renders Cards Here -->
           <p>Loading catalog...</p>
         </div>
       </main>
     </div>
 
+    <!-- JavaScript for product rendering and filtering -->
     <script src="js/shop.js"></script>
+
+    <!-- JavaScript for cart state and cart count updates -->
     <script src="js/cart.js"></script>
   </body>
 </html>
