@@ -1,62 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Product Details | Bytes Vault</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-  
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <!-- Updated Navbar -->
     <nav class="navbar">
-        <a href="index.html" class="nav-brand">Bytes Vault</a>
-        <div class="nav-menu">
-            <a href="shop.html" class="nav-link">Shop</a>
-            <a href="cart.html" class="nav-link">Cart <span id="cart-count" class="badge" style="background:var(--primary); color:white; margin-left:5px;">(0)</span></a>
-            <a href="login.html" id="auth-link" class="nav-btn">Login</a>
-        </div>
+      <a href="index.html" class="nav-brand">Bytes Vault</a>
+      <div class="nav-menu">
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="cart.html" class="nav-link"
+          >Cart
+          <span
+            id="cart-count"
+            class="badge"
+            style="background: var(--primary); color: white; margin-left: 5px"
+            >(0)</span
+          ></a
+        >
+        <a href="login.html" id="auth-link" class="nav-btn">Login</a>
+      </div>
     </nav>
 
     <!-- Main Content -->
-    <div class="container" style="padding-top: 2rem;">
-        
-        <!-- Breadcrumb -->
-        <div style="margin-bottom: 1.5rem;">
-            <a href="shop.html" class="btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 0.5rem 1rem;">
-                &larr; Back to Catalog
-            </a>
+    <div class="container product-page">
+      <!-- Breadcrumb -->
+      <div class="page-bar">
+        <a href="shop.html" class="chip-button">&larr; Back to Catalog</a>
+        <span class="pill-soft">Product Details</span>
+      </div>
+
+      <!-- Product Details Grid -->
+      <!-- JS injects .product-image-section and .product-info-section here -->
+      <div id="product-container" class="product-section">
+        <div class="product-loading">
+          <div class="loading-ring"></div>
+          <p>Loading product details...</p>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <section class="reviews-section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Community</p>
+            <h3>Customer Reviews</h3>
+          </div>
+          <span class="pill-soft">Verified buyers only</span>
         </div>
 
-        <!-- Product Details Grid -->
-        <!-- JS injects .product-image-section and .product-info-section here -->
-        <div id="product-container" class="product-section">
-            <div style="padding: 4rem; text-align: center; width: 100%; grid-column: 1 / -1;">
-                <p style="color: var(--text-muted);">Loading product details...</p>
-            </div>
+        <!-- Reviews List -->
+        <ul id="reviews-list" class="reviews-list">
+          <li class="muted">Loading reviews...</li>
+        </ul>
+
+        <!-- Add Review Form Area -->
+        <div id="review-form-wrapper" class="review-form-wrapper">
+          <!-- JS injects form or login prompt here -->
         </div>
-
-        <!-- Reviews Section -->
-        <div class="reviews-section">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">Customer Reviews</h3>
-            
-            <!-- Reviews List -->
-            <ul id="reviews-list" style="list-style: none; padding: 0;">
-                <li style="color: var(--text-muted); font-style: italic;">Loading reviews...</li>
-            </ul>
-
-            <!-- Add Review Form Area -->
-            <div id="review-form-wrapper" style="margin-top: 2rem; border-top: 1px solid var(--text-muted); padding-top: 2rem; border-color: #e2e8f0;">
-                <!-- JS injects form or login prompt here -->
-            </div>
-        </div>
-
+      </section>
     </div>
 
     <!-- Scripts -->
     <script src="js/loaders.js"></script>
-    <script src="js/cart.js"></script> 
+    <script src="js/cart.js"></script>
     <script src="js/product.js"></script>
-</body>
+  </body>
 </html>
