@@ -2,19 +2,35 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Character encoding for proper text rendering -->
     <meta charset="UTF-8" />
+
+    <!-- Page title shown in browser tab -->
     <title>Login | Bytes Vault</title>
+
+    <!-- External stylesheet for authentication page styling -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
+
+  <!-- Body wrapper specific to authentication pages -->
   <body class="auth-page">
+    <!-- Decorative background noise layer -->
     <div class="auth-noise"></div>
+
+    <!-- Grid container for layout (hero section + login card) -->
     <div class="auth-grid">
+
+      <!-- Left hero section explaining benefits of logging in -->
       <div class="auth-hero">
         <p class="eyebrow">Secure access</p>
         <h1>Welcome back to Bytes Vault</h1>
+
+        <!-- Supporting text for user reassurance -->
         <p class="muted">
           Log in to sync carts, track orders, and keep your builds organized.
         </p>
+
+        <!-- Feature highlights displayed as soft pills -->
         <div class="auth-highlights">
           <span class="pill-soft">Faster checkout</span>
           <span class="pill-soft">Order history</span>
@@ -22,14 +38,18 @@
         </div>
       </div>
 
+      <!-- Login card container -->
       <div class="auth-card">
+
+        <!-- Header section with brand link and instruction -->
         <div class="auth-card__header">
-          <a href="index.html" class="nav-brand" style="font-size: 1.25rem"
-            >Bytes Vault</a
-          >
+          <a href="index.html" class="nav-brand" style="font-size: 1.25rem">
+            Bytes Vault
+          </a>
           <p class="muted">Sign in to continue</p>
         </div>
 
+        <!-- Dynamic error message container (shown via JavaScript) -->
         <div
           id="auth-errors"
           class="form-alert hidden"
@@ -37,7 +57,10 @@
           aria-live="polite"
         ></div>
 
+        <!-- Login form -->
         <form id="loginForm" class="auth-form">
+
+          <!-- Email input field -->
           <div class="form-group">
             <label class="input-label" for="email">Email</label>
             <div class="input-field">
@@ -51,6 +74,8 @@
               />
             </div>
           </div>
+
+          <!-- Password input field -->
           <div class="form-group">
             <label class="input-label" for="password">Password</label>
             <div class="input-field">
@@ -63,11 +88,18 @@
                 required
               />
             </div>
+
+            <!-- Password guidance for users -->
             <p class="field-hint">Use at least 6 characters.</p>
           </div>
-          <button type="submit" class="btn-primary auth-submit">Login</button>
+
+          <!-- Submit button for login -->
+          <button type="submit" class="btn-primary auth-submit">
+            Login
+          </button>
         </form>
 
+        <!-- Footer with navigation to registration page -->
         <div class="auth-footer">
           <p class="muted">
             No account? <a href="register.html">Create one</a>
@@ -76,6 +108,7 @@
       </div>
     </div>
 
+    <!-- JavaScript file handling login validation and authentication -->
     <script src="js/login-logic.js"></script>
   </body>
 </html>
