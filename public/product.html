@@ -1,74 +1,108 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
     <title>Product Details | Bytes Vault</title>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     />
   </head>
+
   <body>
-    <!-- Updated Navbar -->
+    <!-- Navigation Bar -->
     <nav class="navbar">
       <a href="index.html" class="nav-brand">Bytes Vault</a>
+
       <div class="nav-menu">
         <a href="shop.html" class="nav-link">Shop</a>
-        <a href="cart.html" class="nav-link"
-          >Cart
+
+        <a href="cart.html" class="nav-link">
+          Cart
           <span
             id="cart-count"
             class="badge"
-            style="background: var(--primary); color: white; margin-left: 5px"
-            >(0)</span
-          ></a
+            style="background: var(--primary); color: #ffffff; margin-left: 5px"
+          >
+            (0)
+          </span>
+        </a>
+
+        <a
+          href="login.html"
+          id="auth-link"
+          class="nav-btn"
         >
-        <a href="login.html" id="auth-link" class="nav-btn">Login</a>
+          Login
+        </a>
       </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container product-page">
-      <!-- Breadcrumb -->
+    <!-- Main Page Container -->
+    <main class="container product-page">
+      <!-- Page Header / Breadcrumb -->
       <div class="page-bar">
-        <a href="shop.html" class="chip-button">&larr; Back to Catalog</a>
+        <a href="shop.html" class="chip-button">
+          &larr; Back to Catalog
+        </a>
+
         <span class="pill-soft">Product Details</span>
       </div>
 
-      <!-- Product Details Grid -->
-      <!-- JS injects .product-image-section and .product-info-section here -->
-      <div id="product-container" class="product-section">
+      <!-- Product Details Section -->
+      <section
+        id="product-container"
+        class="product-section"
+      >
+        <!-- Loading State -->
         <div class="product-loading">
           <div class="loading-ring"></div>
           <p>Loading product details...</p>
         </div>
-      </div>
+      </section>
 
       <!-- Reviews Section -->
       <section class="reviews-section">
-        <div class="section-header">
+        <header class="section-header">
           <div>
             <p class="eyebrow">Community</p>
             <h3>Customer Reviews</h3>
           </div>
-          <span class="pill-soft">Verified buyers only</span>
-        </div>
+
+          <span class="pill-soft">
+            Verified buyers only
+          </span>
+        </header>
 
         <!-- Reviews List -->
-        <ul id="reviews-list" class="reviews-list">
-          <li class="muted">Loading reviews...</li>
+        <ul
+          id="reviews-list"
+          class="reviews-list"
+        >
+          <li class="muted">
+            Loading reviews...
+          </li>
         </ul>
 
-        <!-- Add Review Form Area -->
-        <div id="review-form-wrapper" class="review-form-wrapper">
-          <!-- JS injects form or login prompt here -->
+        <!-- Review Form Injection Area -->
+        <div
+          id="review-form-wrapper"
+          class="review-form-wrapper"
+        >
+          <!-- JS injects form or login prompt -->
         </div>
       </section>
-    </div>
+    </main>
 
-    <!-- Scripts -->
+    <!-- JavaScript -->
     <script src="js/loaders.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/product.js"></script>
