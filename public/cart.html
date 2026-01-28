@@ -1,57 +1,108 @@
 <!-- public/cart.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Cart | Bytes Vault</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
     <nav class="navbar">
-        <a href="index.html" class="nav-brand">Bytes Vault</a>
-        <div class="nav-links">
-            <a href="shop.html">Continue Shopping</a>
-            <a href="login.html">Login</a>
-        </div>
+      <a href="index.html" class="nav-brand">Bytes Vault</a>
+      <div class="nav-menu">
+        <a href="shop.html" class="nav-link">Continue Shopping</a>
+        <a href="profile.html" class="nav-link">Profile</a>
+        <button
+          id="logout-btn"
+          class="nav-btn danger"
+          style="margin-left: 0.5rem"
+        >
+          Logout
+        </button>
+      </div>
     </nav>
 
-    <div class="admin-container" style="margin-top: 2rem;">
-        <h1>Shopping Cart</h1>
-        
-        <!-- Cart Table -->
-        <div class="table-responsive" style="margin-top: 1rem;">
-            <table style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="cart-body">
-                    <!-- JS Injects Rows Here -->
-                </tbody>
-            </table>
+    <div class="container cart-page">
+      <header class="cart-hero">
+        <div>
+          <p class="eyebrow">Cart</p>
+          <h1>Review your items</h1>
+          <p class="muted">
+            Adjust quantities, then proceed to secure checkout.
+          </p>
         </div>
+        <div class="cart-hero-badges">
+          <span class="pill-soft">Encrypted checkout</span>
+          <span class="pill-soft">30-day returns</span>
+          <span class="pill-soft">Fast dispatch</span>
+        </div>
+      </header>
 
-        <!-- Summary & Checkout -->
-        <div id="cart-summary" style="margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; text-align: right; display:none;">
-            <p>Subtotal: <span id="subtotal" style="font-weight:bold;">$0.00</span></p>
-            <p>Tax (10%): <span id="tax">$0.00</span></p>
-            <hr style="margin: 1rem 0; border-top: 1px solid #eee;">
-            <h2 style="color: var(--vault-blue);">Total: <span id="grand-total">$0.00</span></h2>
-            
-            <button onclick="window.location.href='checkout.html'" class="btn-primary" style="margin-top: 1rem; width: auto; font-size: 1.1rem;">
-                Proceed to Checkout
-            </button>
-        </div>
+      <div class="cart-grid">
+        <section class="cart-table-card">
+          <div class="section-header" style="margin-bottom: 1rem">
+            <div>
+              <p class="eyebrow">Items</p>
+              <h3>Your Cart</h3>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="cart-body">
+                <!-- JS Injects Rows Here -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside
+          class="cart-summary-card"
+          id="cart-summary"
+          style="display: none"
+        >
+          <div class="section-header" style="margin-bottom: 0.75rem">
+            <div>
+              <p class="eyebrow">Summary</p>
+              <h3>Order total</h3>
+            </div>
+          </div>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <strong id="subtotal">$0.00</strong>
+          </div>
+          <div class="summary-row">
+            <span>Tax (10%)</span>
+            <strong id="tax">$0.00</strong>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <strong id="grand-total">$0.00</strong>
+          </div>
+          <button
+            onclick="window.location.href = 'checkout.html'"
+            class="btn-primary"
+            style="width: 100%; margin-top: 1rem; font-size: 1.05rem"
+          >
+            Proceed to Checkout
+          </button>
+          <p class="muted" style="margin-top: 0.75rem; font-size: 0.9rem">
+            Shipping and discounts calculated at checkout.
+          </p>
+        </aside>
+      </div>
     </div>
 
     <script src="js/cart.js"></script>
-</body>
+  </body>
 </html>

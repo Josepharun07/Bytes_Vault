@@ -1,6 +1,6 @@
 // controllers/authController.js
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs"); //brcrypt
 const jwt = require("jsonwebtoken");
 
 // Helper Function to sign JWT with basic validation

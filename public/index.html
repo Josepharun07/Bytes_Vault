@@ -1,40 +1,122 @@
 <!-- public/index.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bytes Vault - Premium Electronics</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-    <!-- Navigation -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Updated Navbar -->
     <nav class="navbar">
-        <a href="index.html" class="nav-brand">Bytes Vault</a>
-        <div class="nav-links">
-            <a href="shop.html">Shop</a>
-            <a href="cart.html">Cart <span id="cart-count">(0)</span></a>
-            <a href="login.html" id="auth-link">Login</a>
-        </div>
+      <a href="index.html" class="nav-brand">Bytes Vault</a>
+      <div class="nav-menu">
+        <a href="shop.html" class="nav-link">Shop</a>
+        <a href="cart.html" class="nav-link"
+          >Cart
+          <span
+            id="cart-count"
+            class="badge"
+            style="background: var(--primary); color: white; margin-left: 2px"
+            >(0)</span
+          ></a
+        >
+        <a href="login.html" id="auth-link" class="nav-btn">Login</a>
+      </div>
     </nav>
 
     <!-- Hero Section -->
-    <div style="text-align: center; padding: 4rem 1rem; background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%); color: white;">
-        <h1 style="font-size: 3rem; margin-bottom: 1rem;">Upgrade Your Setup</h1>
-        <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #ccc;">The best GPUs, CPUs, and Peripherals in one vault.</p>
-        <a href="shop.html" class="btn-primary" style="display: inline-block; width: auto; padding: 1rem 2rem;">Browse Catalog</a>
-    </div>
+    <section class="landing-hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Build faster. Game harder.</p>
+          <h1>Upgrade your setup with curated premium parts.</h1>
+          <p class="muted">
+            GPUs, CPUs, and peripherals vetted for performance, ready to ship.
+          </p>
+          <div class="hero-actions">
+            <a href="shop.html" class="btn-primary hero-cta">Browse catalog</a>
+            <a href="cart.html" class="btn-secondary">Go to cart</a>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric-card">
+              <span class="label">Ready to ship</span>
+              <strong>1,500+</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">Avg. dispatch</span>
+              <strong>24h</strong>
+            </div>
+            <div class="metric-card">
+              <span class="label">Customer rating</span>
+              <strong>4.8</strong>
+            </div>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <p class="eyebrow">Featured drop</p>
+          <h3>Next‑gen graphics, ready for your build.</h3>
+          <p class="muted">
+            Pair with high-bandwidth RAM and low-latency NVMe for the smoothest
+            frames.
+          </p>
+          <div class="hero-stack">
+            <span class="pill-soft">RTX / Radeon</span>
+            <span class="pill-soft">DDR5 kits</span>
+            <span class="pill-soft">PCIe 4.0 NVMe</span>
+          </div>
+          <a href="shop.html" class="btn-primary" style="margin-top: 1rem"
+            >See builds</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Props -->
+    <section class="container value-grid">
+      <div class="value-card">
+        <h4>Curated performance</h4>
+        <p class="muted">
+          Handpicked SKUs that balance thermals, noise, and power draw.
+        </p>
+      </div>
+      <div class="value-card">
+        <h4>Warranty & support</h4>
+        <p class="muted">
+          RMA-friendly partners and fast replacements when you need them.
+        </p>
+      </div>
+      <div class="value-card">
+        <h4>Secure checkout</h4>
+        <p class="muted">
+          Encrypted payments and vault-grade account protection.
+        </p>
+      </div>
+    </section>
 
     <!-- Featured Section -->
-    <div class="admin-container">
-        <h2 style="margin: 2rem 0;">New Arrivals</h2>
-        <div class="product-grid" id="featured-grid">
-            <!-- JS will populate this -->
+    <section class="container home-section">
+      <div class="section-header" style="margin-bottom: 1rem">
+        <div>
+          <p class="eyebrow">New arrivals</p>
+          <h2>Fresh gear in the vault</h2>
         </div>
-    </div>
+        <a href="shop.html" class="btn-secondary">View all</a>
+      </div>
+      <div class="product-grid" id="featured-grid">
+        <!-- JS will populate this -->
+        <p style="grid-column: 1/-1; text-align: center; color: #64748b">
+          Loading premium gear...
+        </p>
+      </div>
+    </section>
 
     <script src="js/shop.js"></script>
     <script src="js/cart.js"></script>
-</body>
+  </body>
 </html>

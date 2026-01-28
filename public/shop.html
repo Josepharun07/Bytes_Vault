@@ -1,50 +1,103 @@
-<!-- public/shop.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catalog - Bytes Vault</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
+  <body>
+    <!-- Top navigation bar -->
     <nav class="navbar">
-        <a href="index.html" class="nav-brand">Bytes Vault</a>
-        <div class="nav-links">
-            <a href="shop.html" style="color:white">Shop</a>
-            <a href="cart.html">Cart <span id="cart-count">(0)</span></a>
-            <a href="login.html" id="auth-link">Login</a>
-        </div>
+      <a href="index.html" class="nav-brand">Bytes Vault</a>
+      <div class="nav-menu">
+        <a href="shop.html" class="nav-link active">Shop</a>
+        <a href="cart.html" class="nav-link">
+          Cart <span id="cart-count" class="badge">(0)</span>
+        </a>
+        <a href="login.html" id="auth-link" class="nav-btn">Login</a>
+      </div>
     </nav>
 
-    <div class="shop-container">
-        <!-- Sidebar -->
-            <div class="filter-group">
-                <h3>Category</h3>
-                <!-- Add "All" option -->
-                <div><input type="radio" name="cat" class="cat-filter" value="All" checked> All Products</div>
-                <!-- Updated List -->
-                <div><input type="radio" name="cat" class="cat-filter" value="GPU"> GPU</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="CPU"> CPU</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="Motherboard"> Motherboard</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="RAM"> RAM</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="Storage"> Storage</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="Laptop"> Laptop</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="Monitor"> Monitor</div>
-                <div><input type="radio" name="cat" class="cat-filter" value="Peripheral"> Peripheral</div>
-            </div>
+    <!-- Shop layout (sidebar + grid) -->
+    <div class="shop-layout">
 
-        <!-- Main Grid -->
-        <main>
-            <div class="product-grid" id="shop-grid">
-                <!-- JS Renders Cards Here -->
-                <p>Loading catalog...</p>
-            </div>
-        </main>
+      <!-- Sidebar filters -->
+      <aside class="filter-panel">
+        <div class="filter-panel__header">
+          <p class="eyebrow">Filters</p>
+          <h3>Browse by category</h3>
+          <p class="muted">Tap a pill to narrow the grid.</p>
+        </div>
+
+        <div class="filter-options">
+          <label class="pill-option"><input type="radio" name="cat" checked /><span>All Products</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>GPU</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>CPU</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>Motherboard</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>RAM</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>Storage</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>Laptop</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>Monitor</span></label>
+          <label class="pill-option"><input type="radio" name="cat" /><span>Peripheral</span></label>
+        </div>
+      </aside>
+
+      <!-- Main product grid -->
+      <main class="shop-grid-wrapper">
+        <div class="product-grid" id="grid">
+
+          <!-- Example Product 1: Low Stock -->
+          <div class="card">
+            <span class="badge low">Low Stock</span>
+            <img src="images/gpu1.jpg" width="200" />
+            <h3>NVIDIA RTX 4070</h3>
+            <p>₹79,999</p>
+            <p>Stock: 3</p>
+            <a href="product.html?id=1">View</a>
+          </div>
+
+          <!-- Example Product 2: Out of Stock -->
+          <div class="card">
+            <span class="badge out">Out of Stock</span>
+            <img src="images/cpu1.jpg" width="200" />
+            <h3>Intel Core i9-13900K</h3>
+            <p>₹54,999</p>
+            <p>Stock: 0</p>
+            <a href="product.html?id=2" style="pointer-events:none;opacity:0.6">View</a>
+          </div>
+
+          <!-- Example Product 3: In Stock -->
+          <div class="card">
+            <img src="images/ram1.jpg" width="200" />
+            <h3>Corsair Vengeance 16GB</h3>
+            <p>₹7,999</p>
+            <p>Stock: 12</p>
+            <a href="product.html?id=3">View</a>
+          </div>
+
+          <!-- Example Product 4: Low Stock -->
+          <div class="card">
+            <span class="badge low">Low Stock</span>
+            <img src="images/motherboard1.jpg" width="200" />
+            <h3>ASUS ROG Strix Z790</h3>
+            <p>₹34,999</p>
+            <p>Stock: 2</p>
+            <a href="product.html?id=4">View</a>
+          </div>
+
+          <!-- Example Product 5: In Stock -->
+          <div class="card">
+            <img src="images/ssd1.jpg" width="200" />
+            <h3>Samsung 1TB NVMe SSD</h3>
+            <p>₹8,499</p>
+            <p>Stock: 20</p>
+            <a href="product.html?id=5">View</a>
+          </div>
+
+        </div>
+      </main>
     </div>
-
-    <script src="js/shop.js"></script>
-    <script src="js/cart.js"></script>
-</body>
+  </body>
 </html>
