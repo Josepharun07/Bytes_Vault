@@ -1,6 +1,6 @@
 {
   "name": "bytes-vault",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "E-Commerce & Inventory Management System - Sprint 1",
   "main": "server.js",
   "scripts": {

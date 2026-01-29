@@ -60,7 +60,6 @@ app.get('/api/system/status', async (req, res) => {
             dbLatency = Date.now() - start;
 
             // Get estimated total documents (User + Product + Order)
-            // We use estimatedDocumentCount for speed
             const users = await mongoose.connection.db.collection('users').estimatedDocumentCount();
             const products = await mongoose.connection.db.collection('products').estimatedDocumentCount();
             const orders = await mongoose.connection.db.collection('orders').estimatedDocumentCount();
@@ -123,7 +122,7 @@ if (require.main === module) {
         // --- CUSTOMER LINKS ---
         console.log(`    Home:         \x1b[34m${BASE_URL}/\x1b[0m`);
         console.log(`    Shop:         \x1b[34m${BASE_URL}/shop.html\x1b[0m`);
-        console.log(`    Cart:         \x1b[34m${BASE_URL}/cart.html\x1b[0m`); // We will build this next
+        console.log(`    Cart:         \x1b[34m${BASE_URL}/cart.html\x1b[0m`);
         
         // --- AUTH LINKS ---
         console.log(`\n    Login:        \x1b[34m${BASE_URL}/login.html\x1b[0m`);
@@ -133,7 +132,7 @@ if (require.main === module) {
         console.log(`\n    Admin Panel:  \x1b[34m${BASE_URL}/dashboard.html\x1b[0m`);
         
         // --- API LINKS ---
-        console.log(`\n    API Health:   \x1b[34m${BASE_URL}/api/health\x1b[0m`);
+        console.log(`\n    API Health:   \x1b[34m${BASE_URL}/api/system/status\x1b[0m`);
         console.log(`\x1b[33m%s\x1b[0m`, `--------------------------------------------------\n`);
     });
 }

@@ -1,7 +1,6 @@
-// models/Order.js
 const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
+const OrderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -9,24 +8,18 @@ const orderSchema = new mongoose.Schema({
     },
     items: [
         {
-            product: { 
-                type: mongoose.Schema.Types.ObjectId, 
+            product: {
+                type: mongoose.Schema.Types.ObjectId,
                 ref: 'Product',
-                required: true 
+                required: true
             },
-            itemName: String, // Snapshot
-            price: Number,    // Snapshot
-            qty: Number
+            quantity: {
+                type: Number,
+                required: true
+            }
         }
     ],
-    shippingAddress: {
-        fullName: String,
-        address: String,
-        city: String,
-        zip: String,
-        country: String
-    },
-    totalAmount: {
+    totalPrice: {
         type: Number,
         required: true
     },
@@ -41,4 +34,4 @@ const orderSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('Order', OrderSchema);

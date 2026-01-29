@@ -86,13 +86,25 @@ exports.getAllOrders = async (req, res) => {
 };
 
 // @desc    Update Status (Admin)
-// @route   PUT /api/orders/:id/status
+// @route   PUT /api/orders/admin/:id
 exports.updateOrderStatus = async (req, res) => {
     try {
+        const { status } = req.body;
+        const validStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
+
+        // 1. Validate Status
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: `Invalid status. Allowed: ${validStatuses.join(', ')}` 
+            });
+        }
+
         const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-        order.status = req.body.status;
+        // 2. Update and Save
+        order.status = status;
         await order.save();
 
         // 🟢 TRIGGER SYNC

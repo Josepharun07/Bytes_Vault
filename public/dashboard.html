@@ -247,9 +247,25 @@
                     <textarea name="description" class="form-control" rows="3" required></textarea>
                 </div>
                 <div class="form-group">
+
+                    <label>Image URL</label>
+                    <input type="file" id="productImage" accept="image/*">
+                </div>
+                <div class="form-group fullwidth">
+                    <button type="submit" class="btn">Save Product</button>
+                    <button type="button" id="cancelEdit" class="btn"
+                        style="background:#6c757d; display:none;">Cancel</button>
+
+                    <label>Technical Specifications</label>
+                    <div id="specs-container" style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;">
+                        <!-- JS will add inputs here -->
+                    </div>
+                    <button type="button" id="add-spec-btn" class="btn-secondary" style="width: auto; font-size: 0.8rem;">+ Add Spec Row</button>
+
                     <label>Specs</label>
                     <div id="specs-container"></div>
                     <button type="button" id="add-spec-btn" class="btn-secondary" style="font-size: 0.8rem; margin-top:5px;">+ Add Spec</button>
+
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%;">Save Product</button>
             </form>

@@ -12,6 +12,7 @@ const initiateDataLayer = async () => {
 
     } catch (error) {
         console.error(`\x1b[31m%s\x1b[0m`, `❌ Database Connection Failed: ${error.message}`);
+        console.log(error);
         process.exit(1);
     }
 };

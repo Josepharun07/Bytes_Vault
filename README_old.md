@@ -152,6 +152,3 @@ We utilize Automated Integration Testing to simulate real user journeys without 
 
 **Developed by the Bytes Vault Team for SIT725.**
 
-
-
-this is a test commit

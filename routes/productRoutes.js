@@ -16,9 +16,9 @@ router.get('/', fetchCatalog);
 
 router.post('/:id/reviews', protect, createProductReview);
 
-// Admin
-router.post('/', protect, admin, upload.single('image'), createCatalogItem);
-router.put('/:id', protect, admin, upload.single('image'), updateCatalogItem); // Edit Route
+// Admin Routes
+router.post('/', protect, admin, upload.array('images', 5), createCatalogItem);
+router.put('/:id', protect, admin, upload.array('images', 5), updateCatalogItem); 
 router.delete('/:id', protect, admin, removeItem);
 
 module.exports = router;
