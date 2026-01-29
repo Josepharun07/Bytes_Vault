@@ -1,8 +1,3 @@
-This is the **Master README.md**.
-
-It is written specifically to **lock down the architecture**. It defines the "Single Source of Truth" for your project. If your teammates follow this, they cannot break the existing logic because the rules (Naming conventions, Folder structure, API contracts) are explicitly defined.
-
-**Action:** Push this to your GitHub repository immediately.
 
 ***
 
