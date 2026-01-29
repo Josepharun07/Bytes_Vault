@@ -6,8 +6,8 @@ const router = express.Router();
 const { 
     createOrder, 
     getMyOrders, 
-    getAllOrders,      // Check if this is greyed out/undefined
-    updateOrderStatus  // Check if this is greyed out/undefined
+    getAllOrders,      
+    updateOrderStatus  
 } = require('../controllers/orderController');
 
 // 2. Import Middleware
