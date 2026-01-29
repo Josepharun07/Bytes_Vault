@@ -68,7 +68,8 @@ async function loadAllOrders() {
 // 3. Update Status Function
 window.updateStatus = async (orderId, newStatus) => {
     try {
-        const res = await fetch(`/api/orders/${orderId}/status`, {
+        // CHANGED: Use new admin route
+        const res = await fetch(`/api/orders/admin/${orderId}`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',

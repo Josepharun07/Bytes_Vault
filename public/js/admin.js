@@ -399,7 +399,8 @@ window.deleteProduct = async (id) => {
 }
 
 window.updateOrderStatus = async (id, status) => {
-    await fetch(`/api/orders/${id}/status`, {
+    // CHANGED: Update to match new route /api/orders/admin/:id
+    await fetch(`/api/orders/admin/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ status })

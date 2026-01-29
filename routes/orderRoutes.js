@@ -1,13 +1,28 @@
+// routes/orderRoutes.js
 const express = require('express');
 const router = express.Router();
 
-const { getMyOrders } = require('../controllers/orderController');
-const { verifyAuthenticationToken } = require('../middleware/authMiddleware');
+// 1. Import Controller Functions
+const { 
+    createOrder, 
+    getMyOrders, 
+    getAllOrders,      
+    updateOrderStatus,
+    getDashboardStats 
+} = require('../controllers/orderController');
 
-// Protect route
-router.use(verifyAuthenticationToken);
+// 2. Import Middleware
+const { protect, admin } = require('../middleware/authMiddleware');
 
-// GET /api/orders/mine
-router.get('/mine', getMyOrders);
+// 3. Customer Routes
+router.post('/', protect, createOrder);
+router.get('/myorders', protect, getMyOrders);
+
+// 4. Admin Routes
+router.get('/admin/all', protect, admin, getAllOrders);
+router.get('/admin/stats', protect, admin, getDashboardStats);
+
+// Update Status: PUT /api/orders/admin/:id
+router.put('/admin/:id', protect, admin, updateOrderStatus);
 
 module.exports = router;
