@@ -1,4 +1,3 @@
-// routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
 const { getAllUsers, updateUserRole, createUser, deleteUser, resetUserPassword } = require('../controllers/userController');
@@ -8,9 +7,9 @@ router.use(protect);
 router.use(admin);
 
 router.get('/', getAllUsers);
-router.post('/', createUser); // Create
+router.post('/', createUser);
 router.put('/:id/role', updateUserRole);
-router.delete('/:id', deleteUser); // Delete
-router.put('/:id/password', resetUserPassword); // Reset Pass
+router.delete('/:id', deleteUser);
+router.put('/:id/password', resetUserPassword);
 
 module.exports = router;

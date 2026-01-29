@@ -2,55 +2,66 @@
 const request = require('supertest');
 const { expect } = require('chai');
 const vaultApp = require('../server');
-const mongoose = require('mongoose');
 const User = require('../models/User');
 
-describe('🔐 Authentication Logic', () => {
-
-    // Clean DB before running tests
+describe('🔐 Authentication Module', () => {
+    
+    // Clear Users before testing
     before(async () => {
         await User.deleteMany({});
     });
 
-    after(async () => {
-        await User.deleteMany({});
-    });
-
-    let validUser = {
-        fullName: "Test Pilot",
-        email: "pilot@bytesvault.com",
-        password: "securePassword123",
+    const adminUser = {
+        fullName: "Super Admin",
+        email: "admin@test.com",
+        password: "password123",
         role: "admin"
     };
 
-    it('Should register a new user successfully (201)', async () => {
+    let adminToken;
+
+    // --- UNIT / INTEGRATION TESTS ---
+
+    it('1. Should register a new Admin user (201)', async () => {
         const res = await request(vaultApp)
             .post('/api/auth/register')
-            .send(validUser);
+            .send(adminUser);
 
         expect(res.status).to.equal(201);
+        expect(res.body.success).to.be.true;
         expect(res.body).to.have.property('token');
-        expect(res.body.member).to.have.property('role', 'admin');
+        expect(res.body).to.have.property('role', 'admin');
+        
+        adminToken = res.body.token; // Save for later
     });
 
-    it('Should login the registered user (200)', async () => {
+    it('2. Should prevent duplicate emails (400)', async () => {
+        const res = await request(vaultApp)
+            .post('/api/auth/register')
+            .send(adminUser);
+
+        expect(res.status).to.equal(400);
+        expect(res.body.message).to.include('Email taken');
+    });
+
+    it('3. Should login successfully with correct credentials (200)', async () => {
         const res = await request(vaultApp)
             .post('/api/auth/login')
             .send({
-                email: validUser.email,
-                password: validUser.password
+                email: adminUser.email,
+                password: adminUser.password
             });
 
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property('token');
     });
 
-    it('Should reject incorrect password (401)', async () => {
+    it('4. Should reject incorrect password (401)', async () => {
         const res = await request(vaultApp)
             .post('/api/auth/login')
             .send({
-                email: validUser.email,
-                password: "wrongPassword"
+                email: adminUser.email,
+                password: "wrongpassword"
             });
 
         expect(res.status).to.equal(401);

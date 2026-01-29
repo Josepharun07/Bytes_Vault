@@ -1,111 +1,54 @@
-// controllers/authController.js
-const User = require("../models/User");
-const bcrypt = require("bcryptjs"); //brcrypt
-const jwt = require("jsonwebtoken");
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-// Helper Function to sign JWT with basic validation
-const generateSessionToken = (id) => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET not configured");
-  const expiresIn = process.env.JWT_EXPIRES_IN || "24h";
-  return jwt.sign({ id }, secret, { expiresIn });
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '24h' });
 };
-
-// @desc    Register a new member
-// @route   POST /api/auth/register
-// controllers/authController.js
 
 exports.registerNewMember = async (req, res) => {
-  try {
-    console.log("1. Registration Request Received:", req.body.email); // <--- LOG
+    try {
+        const { fullName, email, password, role } = req.body;
+        const existing = await User.findOne({ emailAddress: email });
+        
+        if (existing) return res.status(400).json({ success: false, message: 'Email taken' });
 
-    const { fullName, email, password, role } = req.body;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-    const saltRounds = await bcrypt.genSalt(10);
-    const encryptedKey = await bcrypt.hash(password, saltRounds);
+        const user = await User.create({
+            fullName,
+            emailAddress: email,
+            accessKey: hashedPassword,
+            privilegeLevel: role || 'customer'
+        });
 
-    // Explicitly check if user exists first to give better logging
-    const existingUser = await User.findOne({ emailAddress: email });
-    if (existingUser) {
-      console.log("2. User already exists in DB"); // <--- LOG
-      return res
-        .status(400)
-        .json({ success: false, message: "Email already registered" });
+        res.status(201).json({
+            success: true,
+            token: generateToken(user._id),
+            role: user.privilegeLevel
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
-
-    const newMember = await User.create({
-      fullName,
-      emailAddress: email,
-      accessKey: encryptedKey,
-      privilegeLevel: role || "customer",
-    });
-
-    console.log("3. User Saved to MongoDB with ID:", newMember._id); // <--- LOG
-
-    const sessionToken = generateSessionToken(newMember._id);
-
-    res.status(201).json({
-      success: true,
-      token: sessionToken,
-      member: {
-        id: newMember._id,
-        name: newMember.fullName,
-        role: newMember.privilegeLevel,
-      },
-    });
-  } catch (err) {
-    console.error("❌ Registration Error:", err); // <--- LOG
-    if (err.code === 11000) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email is already registered." });
-    }
-    res.status(500).json({ success: false, message: err.message });
-  }
 };
 
-// @desc    Login member
-// @route   POST /api/auth/login
 exports.authenticateMember = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ emailAddress: email }).select('+accessKey');
 
-    // 1. Check if email/password exists
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please provide credentials." });
+        if (user && (await bcrypt.compare(password, user.accessKey))) {
+            res.json({
+                success: true,
+                token: generateToken(user._id),
+                role: user.privilegeLevel,
+                name: user.fullName
+            });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
-
-    // 2. Find Member (explicitly select password since it was hidden in model)
-    const targetMember = await User.findOne({ emailAddress: email }).select(
-      "+accessKey"
-    );
-
-    if (!targetMember) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials." });
-    }
-
-    // 3. Verify Key
-    const isMatch = await bcrypt.compare(password, targetMember.accessKey);
-
-    if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials." });
-    }
-
-    // 4. Issue Token
-    const sessionToken = generateSessionToken(targetMember._id);
-
-    res.status(200).json({
-      success: true,
-      token: sessionToken,
-      role: targetMember.privilegeLevel,
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
 };

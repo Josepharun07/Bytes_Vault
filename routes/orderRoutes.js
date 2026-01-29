@@ -8,7 +8,7 @@ const {
     getMyOrders, 
     getAllOrders,      
     updateOrderStatus,
-    getDashboardStats 
+    getDashboardStats  // <--- ADDED THIS IMPORT
 } = require('../controllers/orderController');
 
 // 2. Import Middleware

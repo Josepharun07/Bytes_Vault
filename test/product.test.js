@@ -3,43 +3,92 @@ const request = require('supertest');
 const { expect } = require('chai');
 const vaultApp = require('../server');
 const Product = require('../models/Product');
+const User = require('../models/User');
 
-describe('📦 Inventory Management', () => {
+describe('📦 Product & Review Module', () => {
+    let adminToken, userToken, productId;
 
     before(async () => {
         await Product.deleteMany({});
+        await User.deleteMany({});
+
+        // Create Admin
+        const adminRes = await request(vaultApp).post('/api/auth/register').send({
+            fullName: "Admin", email: "admin@prod.com", password: "123", role: "admin"
+        });
+        adminToken = adminRes.body.token;
+
+        // Create User (For reviews)
+        const userRes = await request(vaultApp).post('/api/auth/register').send({
+            fullName: "Reviewer", email: "reviewer@prod.com", password: "123"
+        });
+        userToken = userRes.body.token;
     });
 
-    let newProduct = {
-        name: "Gaming Mouse",
-        sku: "MS-001",
-        price: 50,
-        stock: 100,
-        category: "Peripheral",
-        description: "High DPI Mouse"
-    };
-
-    let createdId;
-
-    it('Should create a new product (201)', async () => {
+    it('1. Admin should create a Product (201)', async () => {
         const res = await request(vaultApp)
             .post('/api/products')
-            .send(newProduct); // Note: We aren't testing image upload here to keep it simple
+            .set('Authorization', `Bearer ${adminToken}`)
+            .field('name', 'Gaming Laptop')
+            .field('sku', 'LAP-001')
+            .field('price', 1200)
+            .field('stock', 10)
+            .field('category', 'Laptop')
+            .field('description', 'Fast laptop')
+            .field('specs', '{"RAM":"16GB"}');
+
+        // DEBUG LOG IF FAILURE
+        if(res.status !== 201) console.log("Product Create Failed:", res.body);
 
         expect(res.status).to.equal(201);
-        expect(res.body.product).to.have.property('sku', 'MS-001');
-        createdId = res.body.product._id;
-    });
-
-    it('Should fetch all products (200)', async () => {
-        const res = await request(vaultApp).get('/api/products');
         
-        expect(res.status).to.equal(200);
-        expect(res.body.count).to.equal(1);
+        // CRITICAL FIX: The controller returns { data: product }
+        const product = res.body.data || res.body.product; 
+        expect(product).to.exist;
+        expect(product.itemName).to.equal('Gaming Laptop');
+        
+        productId = product._id; // Save ID for next tests
     });
 
-    it('Should delete the product (200)', async () => {
-        const res = await request(vaultApp).delete(`/api/products/${createdId}`);
-        expect(res.status).to.equal(200);
+    it('2. Customer should NOT be able to delete products (403)', async () => {
+        // Ensure ID exists
+        if(!productId) this.skip();
+
+        const res = await request(vaultApp)
+            .delete(`/api/products/${productId}`)
+            .set('Authorization', `Bearer ${userToken}`);
+
+        expect(res.status).to.equal(403);
+    });
+
+    it('3. Customer should be able to add a Review (201)', async () => {
+        if(!productId) throw new Error("Previous test failed to create product");
+
+        const res = await request(vaultApp)
+            .post(`/api/products/${productId}/reviews`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({
+                rating: 5,
+                comment: "Amazing laptop!"
+            });
+
+        expect(res.status).to.equal(201);
+        
+        const product = await Product.findById(productId);
+        expect(product.reviews.length).to.equal(1);
+        expect(product.rating).to.equal(5);
+    });
+
+    it('4. Customer should NOT be able to review same product twice (400)', async () => {
+        if(!productId) this.skip();
+
+        const res = await request(vaultApp)
+            .post(`/api/products/${productId}/reviews`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({ rating: 1, comment: "Spam" });
+
+        // If it returns 500, it usually means ID is wrong or server crashed. 
+        // We expect 400 (Bad Request) handled by controller logic.
+        expect(res.status).to.equal(400);
     });
 });

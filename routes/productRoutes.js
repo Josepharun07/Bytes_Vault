@@ -1,24 +1,12 @@
-// routes/productRoutes.js
 const express = require('express');
 const router = express.Router();
-const { 
-    createCatalogItem, 
-    fetchCatalog, 
-    removeItem, 
-    updateCatalogItem,   
-    createProductReview  
-} = require('../controllers/productController');
-const upload = require('../middleware/uploadMiddleware');
+const { fetchCatalog, createCatalogItem, removeItem, createProductReview } = require('../controllers/productController');
 const { protect, admin } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
-// Public Route (View Products)
 router.get('/', fetchCatalog);
-
-router.post('/:id/reviews', protect, createProductReview);
-
-// Admin Routes
-router.post('/', protect, admin, upload.array('images', 5), createCatalogItem);
-router.put('/:id', protect, admin, upload.array('images', 5), updateCatalogItem); 
+router.post('/', protect, admin, upload.single('image'), createCatalogItem);
 router.delete('/:id', protect, admin, removeItem);
+router.post('/:id/reviews', protect, createProductReview);
 
 module.exports = router;

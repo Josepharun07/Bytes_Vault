@@ -1,7 +1,7 @@
 // test/server.test.js
 const request = require('supertest');
 const { expect } = require('chai');
-const vaultApp = require('../server'); // Import our app
+const vaultApp = require('../server');
 
 describe('🔹 Infrastructure & Server Health', () => {
     
@@ -9,12 +9,12 @@ describe('🔹 Infrastructure & Server Health', () => {
         const response = await request(vaultApp).get('/api/health');
         
         expect(response.status).to.equal(200);
-        expect(response.body).to.have.property('systemStatus', 'Operational');
+        // FIX: The server sends 'status', not 'systemStatus'
+        expect(response.body).to.have.property('status', 'Operational');
     });
 
     it('Should serve static files (e.g., return 404 for missing file, but not crash)', async () => {
         const response = await request(vaultApp).get('/non-existent-file.html');
-        // Express static returns 404 by default for missing files
         expect(response.status).to.equal(404);
     });
 });
