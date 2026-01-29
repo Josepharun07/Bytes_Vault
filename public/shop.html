@@ -32,72 +32,36 @@
         </div>
 
         <div class="filter-options">
-          <label class="pill-option"><input type="radio" name="cat" checked /><span>All Products</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>GPU</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>CPU</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>Motherboard</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>RAM</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>Storage</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>Laptop</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>Monitor</span></label>
-          <label class="pill-option"><input type="radio" name="cat" /><span>Peripheral</span></label>
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="search-input" class="form-control" placeholder="Search products..." style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">
+            </div>
+
+            <!-- Radio Buttons for Category -->
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="All" checked /><span>All</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="GPU" /><span>GPU</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="CPU" /><span>CPU</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Motherboard" /><span>Motherboard</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="RAM" /><span>RAM</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Storage" /><span>Storage</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Laptop" /><span>Laptop</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Monitor" /><span>Monitor</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Peripheral" /><span>Peripheral</span></label>
+            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Console" /><span>Console</span></label>
+            
+            <button onclick="applyFilters()" class="btn-primary" style="margin-top: 1rem; width: 100%;">Apply Filters</button>
         </div>
       </aside>
 
       <!-- Main product grid -->
       <main class="shop-grid-wrapper">
-        <div class="product-grid" id="grid">
-
-          <!-- Example Product 1: Low Stock -->
-          <div class="card">
-            <span class="badge low">Low Stock</span>
-            <img src="images/gpu1.jpg" width="200" />
-            <h3>NVIDIA RTX 4070</h3>
-            <p>₹79,999</p>
-            <p>Stock: 3</p>
-            <a href="product.html?id=1">View</a>
-          </div>
-
-          <!-- Example Product 2: Out of Stock -->
-          <div class="card">
-            <span class="badge out">Out of Stock</span>
-            <img src="images/cpu1.jpg" width="200" />
-            <h3>Intel Core i9-13900K</h3>
-            <p>₹54,999</p>
-            <p>Stock: 0</p>
-            <a href="product.html?id=2" style="pointer-events:none;opacity:0.6">View</a>
-          </div>
-
-          <!-- Example Product 3: In Stock -->
-          <div class="card">
-            <img src="images/ram1.jpg" width="200" />
-            <h3>Corsair Vengeance 16GB</h3>
-            <p>₹7,999</p>
-            <p>Stock: 12</p>
-            <a href="product.html?id=3">View</a>
-          </div>
-
-          <!-- Example Product 4: Low Stock -->
-          <div class="card">
-            <span class="badge low">Low Stock</span>
-            <img src="images/motherboard1.jpg" width="200" />
-            <h3>ASUS ROG Strix Z790</h3>
-            <p>₹34,999</p>
-            <p>Stock: 2</p>
-            <a href="product.html?id=4">View</a>
-          </div>
-
-          <!-- Example Product 5: In Stock -->
-          <div class="card">
-            <img src="images/ssd1.jpg" width="200" />
-            <h3>Samsung 1TB NVMe SSD</h3>
-            <p>₹8,499</p>
-            <p>Stock: 20</p>
-            <a href="product.html?id=5">View</a>
-          </div>
-
+        <!-- CHANGED: ID is now 'shop-grid' to match JS, and it is EMPTY -->
+        <div class="product-grid" id="shop-grid">
+            <p class="muted" style="grid-column: 1/-1; text-align: center; padding: 2rem;">Loading catalog...</p>
         </div>
       </main>
     </div>
+
+    <script src="js/shop.js"></script>
+    <script src="js/cart.js"></script>
   </body>
 </html>
