@@ -54,12 +54,26 @@ function renderGrid(container, products) {
     }
 
     products.forEach(p => {
-        const img = p.imageUrl || 'uploads/products/no-image.jpg';
+        // FIX: Robust Image Selection Logic
+        let img = 'https://placehold.co/600x400?text=No+Image'; // Fallback
+
+        // 1. Check the new Array format (Priority)
+        if (p.images && p.images.length > 0) {
+            img = p.images[0];
+        } 
+        // 2. Check legacy field, but IGNORE the known broken string
+        else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') {
+            img = p.imageUrl;
+        }
+
+        // 3. Fix Local Pathing (Add leading slash if missing)
+        if (!img.startsWith('http') && !img.startsWith('/')) {
+            img = '/' + img;
+        }
         
         // Stock Logic for Badge
         let badgeHtml = '';
         let opacityStyle = '';
-        let clickAction = `onclick="window.location.href='product.html?id=${p._id}'"`;
 
         if (p.stockCount === 0) {
             badgeHtml = '<span class="badge" style="background:#fee2e2; color:#991b1b; position:absolute; top:10px; right:10px;">Out of Stock</span>';
@@ -75,7 +89,7 @@ function renderGrid(container, products) {
         
         card.innerHTML = `
             ${badgeHtml}
-            <img src="${img}" class="card-img-top" alt="${p.itemName}" onerror="this.src='https://placehold.co/300?text=No+Image'">
+            <img src="${img}" class="card-img-top" alt="${p.itemName}" onerror="this.src='https://placehold.co/600x400?text=Image+Error'">
             <div class="card-body">
                 <h3 class="card-title">${p.itemName}</h3>
                 <div style="display:flex; justify-content:space-between; align-items:center;">

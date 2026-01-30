@@ -42,8 +42,18 @@ async function loadProduct() {
     currentProduct = product; 
 
     // FIX: Use correct path separator (/) not (\)
-    const imgUrl = product.imageUrl || 'uploads/products/no-image.jpg';
+    let imgUrl = 'https://placehold.co/600x400?text=No+Image';
 
+     if (product.images && product.images.length > 0) {
+        imgUrl = product.images[0];
+    } else if (product.imageUrl && product.imageUrl !== 'uploads/products/no-image.jpg') {
+        imgUrl = product.imageUrl;
+    }
+
+    // Fix pathing
+    if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
+        imgUrl = '/' + imgUrl;
+    }
     // Render Specs
     let specsHtml = '';
     if (product.specs) {

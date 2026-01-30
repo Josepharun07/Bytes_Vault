@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Load logs from local storage immediately
     loadSavedLogs();
 
-    // 2. Initial Data Fetch (Visual placeholder)
+    // 2. Initial Data Fetch
     performFullSync(true); 
 
     // 3. Initialize Real-time System
@@ -37,34 +37,46 @@ window.switchView = (viewName) => {
 // ========================
 
 function initRealTime() {
+    // Connect to the socket server
     socket = io();
     const connType = document.getElementById('sys-conn-type');
 
     // ON CONNECT
     socket.on('connect', () => {
-        logEvent('✅ Connected to Bytes Vault Server');
+        logEvent('✅ Connected to Real-time Stream');
         if(connType) {
             connType.innerText = 'WebSocket (Live)';
             connType.style.color = 'var(--success)';
         }
-        performFullSync();
+        // Force a sync on connection to ensure fresh data
+        performFullSync(true);
     });
 
     socket.on('disconnect', () => {
-        logEvent('❌ Disconnected from Server');
+        logEvent('❌ Disconnected from Stream');
         if(connType) {
             connType.innerText = 'Offline';
             connType.style.color = 'var(--danger)';
         }
     });
 
-    // DATA UPDATES
+    // DATA UPDATES (The Core Auto-Update Logic)
     socket.on('data:updated', (data) => {
+        // 1. Log the specific event
         logEvent(`⚡ UPDATE: ${data.message || 'Data changed'}`);
+        
+        // 2. Refresh ALL tables automatically
         performFullSync(true); 
+        
+        // 3. Visual Feedback (Flash the sync button)
+        const btn = document.getElementById('sync-btn');
+        if(btn) {
+            btn.style.backgroundColor = '#f59e0b'; // Flash Orange
+            setTimeout(() => btn.style.backgroundColor = '', 500);
+        }
     });
 
-    // SYSTEM METRICS (Real-time user count update)
+    // SYSTEM METRICS (Real-time user count)
     socket.on('system:metrics', (data) => {
         const activeUsersEl = document.getElementById('sys-active-users');
         if (activeUsersEl) activeUsersEl.innerText = data.connections;
@@ -76,6 +88,7 @@ async function performFullSync(silent = false) {
     if(!silent) logEvent('> Retrieving data from MongoDB...');
     
     try {
+        // Reload all data sections
         await Promise.all([
             loadStats(silent),
             loadInventory(silent),
@@ -111,43 +124,30 @@ window.manualSync = async () => {
     }, 1500);
 };
 
-// --- ENHANCED DB STATUS CHECK ---
+// --- DB STATUS CHECK ---
 async function checkDbStatus(silent) {
     try {
         const res = await fetch('/api/system/status');
+        if(!res.ok) return; // Ignore if server route not ready
+        
         const data = await res.json();
         
-        // 1. Connection Status
-        const statusEl = document.getElementById('sys-db-status');
-        if(statusEl) {
-            statusEl.innerText = data.dbStatus;
-            statusEl.style.color = data.connected ? 'var(--success)' : 'var(--danger)';
+        const elements = {
+            'sys-db-status': { val: data.dbStatus, color: data.connected ? 'var(--success)' : 'var(--danger)' },
+            'sys-active-users': { val: data.activeConnections },
+            'sys-latency': { val: data.latency >= 0 ? `${data.latency} ms` : 'N/A' },
+            'sys-uptime': { val: formatUptime(data.uptime) },
+            'sys-total-docs': { val: data.totalDocuments },
+            'sys-env': { val: data.environment }
+        };
+
+        for (const [id, info] of Object.entries(elements)) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.innerText = info.val;
+                if(info.color) el.style.color = info.color;
+            }
         }
-
-        // 2. Active Users
-        const activeEl = document.getElementById('sys-active-users');
-        if(activeEl) activeEl.innerText = data.activeConnections;
-
-        // 3. Latency
-        const latencyEl = document.getElementById('sys-latency');
-        if(latencyEl) {
-            latencyEl.innerText = data.latency >= 0 ? `${data.latency} ms` : 'N/A';
-            latencyEl.style.color = data.latency < 100 ? 'var(--success)' : 'var(--warning)';
-        }
-
-        // 4. Uptime
-        const uptimeEl = document.getElementById('sys-uptime');
-        if(uptimeEl) uptimeEl.innerText = formatUptime(data.uptime);
-
-        // 5. Total Docs
-        const docsEl = document.getElementById('sys-total-docs');
-        if(docsEl) docsEl.innerText = data.totalDocuments;
-
-        // 6. Environment
-        const envEl = document.getElementById('sys-env');
-        if(envEl) envEl.innerText = data.environment;
-
-        if(!data.connected) logEvent(`! Database Warning: ${data.dbStatus}`);
 
     } catch (err) {
         if(!silent) logEvent('! System API Unreachable');
@@ -220,15 +220,10 @@ async function loadStats(silent) {
             document.getElementById('stat-orders').innerText = result.stats.orders;
             document.getElementById('stat-users').innerText = result.stats.users;
             
-            const list = document.getElementById('low-stock-list');
-            list.innerHTML = result.stats.lowStock.map(p => `
-                <li style="padding:10px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between;">
-                    <span>${p.itemName}</span>
-                    <span style="color:var(--danger); font-weight:bold;">${p.stockCount} left</span>
-                </li>
-            `).join('');
-            
-            if(!silent) logEvent(`✓ Stats: ${result.stats.orders} Total Orders`);
+            // Populate Best Sellers if present
+            if(document.getElementById('top-products-list')) {
+                // This would usually come from analytics endpoint, but for now we rely on analytics.js to fill that
+            }
         }
     } catch (err) { console.error(err); }
 }
@@ -242,7 +237,17 @@ async function loadInventory(silent) {
 
         if (result.data && result.data.length > 0) {
             result.data.forEach(p => {
-                const img = p.imageUrl || 'uploads/products/no-image.jpg';
+                let img = 'https://placehold.co/100?text=No+Img';
+                
+                if (p.images && p.images.length > 0) {
+                    img = p.images[0];
+                } else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') {
+                    img = p.imageUrl;
+                }
+
+                if (!img.startsWith('http') && !img.startsWith('/')) {
+                    img = '/' + img;
+                }
                 const stockDisplay = p.stockCount < 5 
                     ? `<span style="color:var(--danger); font-weight:bold;">${p.stockCount} (Low)</span>` 
                     : p.stockCount;
@@ -277,20 +282,31 @@ async function loadOrders(silent) {
         if (result.data && result.data.length > 0) {
             result.data.forEach(o => {
                 const tr = document.createElement('tr');
+                
+                // --- NEW ORDER ACTION UI ---
+                // We create a specific ID for the select box to grab its value later
+                // We added a "Save" button to trigger the update
+                const actionHtml = `
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <select id="status-select-${o._id}" style="padding:5px; border:1px solid #cbd5e1; border-radius:6px;">
+                            <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
+                            <option value="Shipped" ${o.status==='Shipped'?'selected':''}>Shipped</option>
+                            <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+                            <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                        </select>
+                        <button class="btn-primary" onclick="submitOrderStatus('${o._id}')" style="padding: 5px 10px; font-size: 0.8rem;">
+                            💾
+                        </button>
+                    </div>
+                `;
+
                 tr.innerHTML = `
                     <td style="font-family:monospace">#${o._id.slice(-4)}</td>
                     <td>${o.user ? o.user.fullName : 'Unknown'}</td>
                     <td>${new Date(o.createdAt).toLocaleDateString()}</td>
                     <td>$${o.totalAmount.toFixed(2)}</td>
                     <td><span class="badge" style="background:${getStatusColor(o.status)}; color:white;">${o.status}</span></td>
-                    <td>
-                        <select onchange="updateOrderStatus('${o._id}', this.value)" style="padding:5px; border:1px solid #cbd5e1; border-radius:6px;">
-                            <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
-                            <option value="Shipped" ${o.status==='Shipped'?'selected':''}>Shipped</option>
-                            <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
-                            <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
-                        </select>
-                    </td>
+                    <td>${actionHtml}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -331,7 +347,45 @@ async function loadUsers(silent) {
     } catch (err) { console.error(err); }
 }
 
-// --- STANDARD ACTIONS (Unchanged) ---
+// --- STANDARD ACTIONS ---
+
+// New function to handle manual order status submission
+window.submitOrderStatus = async (id) => {
+    const selectEl = document.getElementById(`status-select-${id}`);
+    const newStatus = selectEl.value;
+
+    const btn = selectEl.nextElementSibling; // The save button
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`/api/orders/admin/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        const data = await res.json();
+        
+        if (data.success) {
+            logEvent(`Order #${id.slice(-4)} updated to ${newStatus}`);
+            // Note: The socket broadcast from backend will trigger a full table reload,
+            // so we don't necessarily need to reload manually, but we do so for instant feedback.
+            loadOrders(true);
+        } else {
+            alert('Update Failed: ' + data.message);
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Network Error');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+};
+
 function addSpecField() {
     const container = document.getElementById('specs-container');
     const div = document.createElement('div');
@@ -383,6 +437,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
         if (data.success) {
             alert('Product Added');
             document.getElementById('product-modal').style.display = 'none';
+            // The socket will handle reload, but we can do it locally too
         } else {
             alert('Error: ' + data.message);
         }
@@ -395,17 +450,9 @@ window.deleteProduct = async (id) => {
             method: 'DELETE', 
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } 
         });
+        // The socket will trigger auto-update
     }
 }
-
-window.updateOrderStatus = async (id, status) => {
-    // CHANGED: Update to match new route /api/orders/admin/:id
-    await fetch(`/api/orders/admin/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ status })
-    });
-};
 
 function getStatusColor(status) {
     if (status === 'Pending') return 'var(--warning)';
@@ -490,6 +537,9 @@ let salesChartInstance = null;
 let categoryChartInstance = null;
 
 async function loadAnalytics() {
+    // Only load charts if we are in dashboard view to save resources
+    if(!document.getElementById('salesChart')) return;
+
     try {
         const headers = { 'Authorization': `Bearer ${token}` };
 
@@ -514,10 +564,11 @@ async function loadAnalytics() {
     }
 }
 
+// Call analytics load after init
+setTimeout(loadAnalytics, 1000);
+
 function renderSalesChart(data) {
     const ctx = document.getElementById('salesChart').getContext('2d');
-    
-    // Destroy previous if exists (prevents glitching on reload)
     if (salesChartInstance) salesChartInstance.destroy();
 
     const labels = data.map(d => d._id);
@@ -542,7 +593,6 @@ function renderSalesChart(data) {
 
 function renderCategoryChart(data) {
     const ctx = document.getElementById('categoryChart').getContext('2d');
-    
     if (categoryChartInstance) categoryChartInstance.destroy();
 
     const labels = data.map(d => d._id);
@@ -565,6 +615,7 @@ function renderCategoryChart(data) {
 
 function renderTopProducts(data) {
     const tbody = document.getElementById('top-products-list');
+    if(!tbody) return;
     tbody.innerHTML = data.map(p => `
         <tr style="border-bottom:1px solid #eee;">
             <td style="padding:10px 0;">${p._id}</td>
@@ -610,4 +661,3 @@ window.exportCSV = async (type) => {
         alert('Export Failed');
     }
 };
-
