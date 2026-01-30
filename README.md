@@ -158,4 +158,4 @@ When writing queries or frontend displays, strictly use these field names:
     ```
 
 ---
-*Maintained by the Bytes Vault Engineering Team.*
+*Maintained by the Bytes Vault Team For SIT725.*

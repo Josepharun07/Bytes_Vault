@@ -46,38 +46,78 @@
         </div>
 
         <!-- 1. DASHBOARD VIEW -->
-        <section id="view-dashboard" class="view-section active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div>
-                        <p>Total Revenue</p>
-                        <h3 id="stat-revenue">$0.00</h3>
+            <section id="view-dashboard" class="view-section active">
+                
+                <!-- KPI CARDS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div><h3 id="stat-revenue">$0.00</h3><p>Revenue</p></div>
+                        <div class="stat-icon" style="color:var(--success);">💰</div>
                     </div>
-                    <div class="stat-icon" style="color: var(--success);">💰</div>
-                </div>
-                <div class="stat-card">
-                    <div>
-                        <p>Total Orders</p>
-                        <h3 id="stat-orders">0</h3>
+                    <div class="stat-card">
+                        <div><h3 id="stat-orders">0</h3><p>Orders</p></div>
+                        <div class="stat-icon" style="color:var(--primary);">🛒</div>
                     </div>
-                    <div class="stat-icon" style="color: var(--primary);">🛒</div>
-                </div>
-                <div class="stat-card">
-                    <div>
-                        <p>Active Users</p>
-                        <h3 id="stat-users">0</h3>
+                    <div class="stat-card">
+                        <div><h3 id="stat-users">0</h3><p>Users</p></div>
+                        <div class="stat-icon" style="color:var(--warning);">👥</div>
                     </div>
-                    <div class="stat-icon" style="color: var(--warning);">👥</div>
                 </div>
-            </div>
-            
-            <div class="card">
-                <h3 style="margin-bottom: 1rem;">⚠️ Low Stock Alerts</h3>
-                <ul id="low-stock-list" style="list-style: none;">
-                    <!-- Injected via JS -->
-                </ul>
-            </div>
-        </section>
+
+                <!-- ANALYTICS CHARTS ROW -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Line Chart -->
+                    <div class="card">
+                        <h3>Sales Trend (Last 7 Days)</h3>
+                        <div style="height: 300px;">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Doughnut Chart -->
+                    <div class="card">
+                        <h3>Sales by Category</h3>
+                        <div style="height: 250px; display:flex; align-items:center; justify-content:center;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTTOM ROW -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    
+                    <!-- Top Products Table -->
+                    <div class="card">
+                        <h3>🏆 Best Sellers</h3>
+                        <table style="width:100%; margin-top:1rem;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;">Product</th>
+                                    <th>Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-products-list">
+                                <!-- JS Injects here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Reports & Exports -->
+                    <div class="card">
+                        <h3>📑 Seller Reports</h3>
+                        <p style="color:var(--text-muted); margin-bottom:1.5rem;">Download data for accounting and inventory checks.</p>
+                        
+                        <div style="display:grid; gap:1rem;">
+                            <button onclick="exportCSV('inventory')" class="btn-secondary" style="justify-content:flex-start;">
+                                📥 Export Inventory List (CSV)
+                            </button>
+                            <button onclick="exportCSV('orders')" class="btn-secondary" style="justify-content:flex-start;">
+                                📥 Export Sales History (CSV)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>>
 
         <!-- 2. INVENTORY VIEW -->
         <section id="view-inventory" class="view-section">

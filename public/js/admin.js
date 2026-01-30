@@ -480,3 +480,134 @@ document.getElementById('logout-btn').onclick = () => {
     localStorage.clear();
     window.location.href = 'login.html';
 };
+
+
+// ========================
+// SECTION: ANALYTICS & CHARTS
+// ========================
+
+let salesChartInstance = null;
+let categoryChartInstance = null;
+
+async function loadAnalytics() {
+    try {
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        // 1. Fetch Trend Data
+        const trendRes = await fetch('/api/analytics/trend', { headers });
+        const trendData = await trendRes.json();
+
+        // 2. Fetch Category Data
+        const catRes = await fetch('/api/analytics/categories', { headers });
+        const catData = await catRes.json();
+
+        // 3. Fetch Top Products
+        const topRes = await fetch('/api/analytics/top-products', { headers });
+        const topData = await topRes.json();
+
+        if (trendData.success) renderSalesChart(trendData.data);
+        if (catData.success) renderCategoryChart(catData.data);
+        if (topData.success) renderTopProducts(topData.data);
+
+    } catch (err) {
+        console.error("Analytics Error:", err);
+    }
+}
+
+function renderSalesChart(data) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Destroy previous if exists (prevents glitching on reload)
+    if (salesChartInstance) salesChartInstance.destroy();
+
+    const labels = data.map(d => d._id);
+    const values = data.map(d => d.totalSales);
+
+    salesChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue ($)',
+                data: values,
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function renderCategoryChart(data) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    
+    if (categoryChartInstance) categoryChartInstance.destroy();
+
+    const labels = data.map(d => d._id);
+    const values = data.map(d => d.revenue);
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+    categoryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function renderTopProducts(data) {
+    const tbody = document.getElementById('top-products-list');
+    tbody.innerHTML = data.map(p => `
+        <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px 0;">${p._id}</td>
+            <td style="text-align:center;">${p.qty}</td>
+            <td style="text-align:center; font-weight:bold; color:var(--success);">$${p.revenue.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+// ========================
+// SECTION: EXPORT TOOLS
+// ========================
+
+window.exportCSV = async (type) => {
+    let url = type === 'inventory' ? '/api/products' : '/api/orders/admin/all';
+    
+    try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        const json = await res.json();
+        
+        if (!json.success) return alert('Failed to fetch data');
+
+        const items = json.data;
+        if (items.length === 0) return alert('No data to export');
+
+        // Convert JSON to CSV
+        const replacer = (key, value) => value === null ? '' : value; 
+        const header = Object.keys(items[0]);
+        const csv = [
+            header.join(','), // Header Row
+            ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(',')) // Data Rows
+        ].join('\r\n');
+
+        // Trigger Download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `${type}_report_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+
+    } catch (err) {
+        console.error(err);
+        alert('Export Failed');
+    }
+};
+
