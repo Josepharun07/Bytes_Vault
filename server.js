@@ -6,6 +6,7 @@ const path = require('path');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const mongoose = require('mongoose'); // Added for status check
 const initiateDataLayer = require('./config/db');
 
 // Import Routes
@@ -40,12 +41,30 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// 4. System Health Check
-app.get('/api/health', (req, res) => {
+// 4. System Health Check (Fixed to match admin.js)
+app.get('/api/system/status', async (req, res) => {
+    const isConnected = mongoose.connection.readyState === 1;
+    let latency = 0;
+
+    // Calculate DB Latency
+    if (isConnected) {
+        const start = Date.now();
+        try {
+            await mongoose.connection.db.admin().ping();
+            latency = Date.now() - start;
+        } catch (e) {
+            latency = -1;
+        }
+    }
+
     res.status(200).json({ 
-        status: 'Operational', 
-        connections: io.engine.clientsCount,
-        uptime: process.uptime()
+        connected: isConnected,
+        dbStatus: isConnected ? 'Connected' : 'Disconnected', 
+        activeConnections: io.engine.clientsCount,
+        uptime: process.uptime(),
+        latency: latency,
+        totalDocuments: 'Check DB', // Placeholder to save performance
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 
@@ -63,7 +82,7 @@ app.use((err, req, res, next) => {
 
 // 7. Server Activation
 const SYSTEM_PORT = process.env.PORT || 3000;
-const BASE_URL = `http://20.2.235.215:${SYSTEM_PORT}`;
+const BASE_URL = `http://localhost:${SYSTEM_PORT}`;
 
 if (require.main === module) {
     server.listen(SYSTEM_PORT, () => {
