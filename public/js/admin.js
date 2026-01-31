@@ -1,6 +1,8 @@
 // public/js/admin.js
 
-// 1. Security & Init
+// ========================
+// 1. SECURITY & INIT
+// ========================
 const token = localStorage.getItem('vault_token');
 const role = localStorage.getItem('vault_role');
 
@@ -26,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('dashboard');
 });
 
-// 2. Navigation Logic
+// Navigation Logic
 window.switchView = (viewName) => {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
@@ -35,8 +37,18 @@ window.switchView = (viewName) => {
     document.getElementById(`nav-${viewName}`).classList.add('active');
 };
 
+// Global Modal Closer
+window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+// Logout
+document.getElementById('logout-btn').onclick = () => {
+    localStorage.clear();
+    window.location.href = 'login.html';
+};
+
+
 // ========================
-// SECTION: REAL-TIME SYSTEM & LOGGING
+// 2. REAL-TIME SYSTEM & LOGGING
 // ========================
 
 function initRealTime() {
@@ -209,8 +221,9 @@ window.clearSystemLogs = () => {
     logEvent('Logs Cleared.');
 };
 
+
 // ========================
-// SECTION: DATA LOADERS
+// 3. STATS & ANALYTICS DATA
 // ========================
 async function loadStats(silent) {
     try {
@@ -222,65 +235,109 @@ async function loadStats(silent) {
             document.getElementById('stat-revenue').innerText = `$${result.stats.revenue.toFixed(2)}`;
             document.getElementById('stat-orders').innerText = result.stats.orders;
             document.getElementById('stat-users').innerText = result.stats.users;
-            
-            // Populate Best Sellers if present
-            if(document.getElementById('top-products-list')) {
-                // This would usually come from analytics endpoint, but for now we rely on analytics.js to fill that
-            }
         }
     } catch (err) { console.error(err); }
 }
 
+
 // ========================
-// SECTION: INVENTORY LOGIC
+// 4. INVENTORY LOGIC
 // ========================
+
 
 async function loadInventory(silent) {
     try {
+        // 1. Fetch Data
         const res = await fetch('/api/products');
         const result = await res.json();
+        
+        // 2. Get Table Body
         const tbody = document.getElementById('table-body');
+        if (!tbody) {
+            console.error("Error: Element 'table-body' not found in HTML.");
+            return;
+        }
         tbody.innerHTML = ''; 
 
-        if (result.data && result.data.length > 0) {
+        // 3. Render
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
             inventoryData = result.data; // Store for editing
 
             result.data.forEach(p => {
-                const img = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || 'https://placehold.co/100?text=No+Img');
-                if (!img.startsWith('http') && !img.startsWith('/')) img = '/' + img;
+                // --- SAFE IMAGE HANDLING ---
+                let img = 'https://placehold.co/100?text=No+Img';
+                
+                if (Array.isArray(p.images) && p.images.length > 0) {
+                    img = p.images[0];
+                } else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') {
+                    img = p.imageUrl;
+                }
 
-                const stockDisplay = p.stockCount < 5 
-                    ? `<span style="color:var(--danger); font-weight:bold;">${p.stockCount} (Low)</span>` 
-                    : p.stockCount;
+                // Ensure path is absolute if local
+                if (typeof img === 'string' && !img.startsWith('http') && !img.startsWith('/')) {
+                    img = '/' + img;
+                }
 
+                // --- SAFE FIELD HANDLING ---
+                const name = p.itemName || 'Unnamed Product';
+                const cat = p.category || 'Uncategorized';
+                const price = p.price !== undefined ? parseFloat(p.price).toFixed(2) : '0.00';
+                const stock = p.stockCount !== undefined ? p.stockCount : 0;
+
+                // Stock Badge Logic
+                const stockDisplay = stock < 5 
+                    ? `<span style="color:var(--danger); font-weight:bold;">${stock} (Low)</span>` 
+                    : stock;
+
+                // Create Row
                 const tr = document.createElement('tr');
                 tr.className = 'clickable-row';
-                // Make row clickable
                 tr.onclick = () => openEditProductModal(p._id);
 
                 tr.innerHTML = `
-                    <td><img src="${img}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
-                    <td style="font-weight:600; color:var(--primary);">${p.itemName}</td>
-                    <td><span class="badge" style="background:#f1f5f9;">${p.category}</span></td>
-                    <td>$${p.price}</td>
+                    <td>
+                        <img src="${img}" width="40" height="40" 
+                             style="object-fit:cover; border-radius:8px;" 
+                             onerror="this.src='https://placehold.co/40?text=Err'">
+                    </td>
+                    <td style="font-weight:600; color:var(--primary);">${name}</td>
+                    <td><span class="badge" style="background:#f1f5f9;">${cat}</span></td>
+                    <td>$${price}</td>
                     <td>${stockDisplay}</td>
                     <td style="color:#94a3b8; font-size:0.8rem;">Click to Edit</td>
                 `;
                 tbody.appendChild(tr);
             });
+
             if(!silent) logEvent(`✓ Inventory: Loaded ${result.data.length} Products`);
         } else {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No products found.</td></tr>';
+            // Empty State
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #64748b;">No products found in the database.</td></tr>';
+            if(!silent) logEvent(`! Inventory: 0 items returned from API.`);
         }
-    } catch (err) { console.error("Inventory Error:", err); }
+    } catch (err) { 
+        console.error("Inventory Render Error:", err); 
+        logEvent(`! Inventory Error: ${err.message}`);
+    }
 }
 
 // --- PRODUCT MODAL ACTIONS ---
 
-// Open Modal for CREATE
+
+// 1. Open Modal for CREATE
 document.getElementById('add-product-btn').onclick = () => {
     document.getElementById('product-modal').style.display = 'block';
+    
+    // Reset the form (This clears the file input text)
     document.getElementById('add-product-form').reset();
+    
+    // Explicitly clear file input value just in case
+    const fileInput = document.querySelector('input[name="image"]');
+    if(fileInput) fileInput.value = '';
+
+    // Hide the "Current Image" preview since this is a new product
+    document.getElementById('modal-img-preview').style.display = 'none';
+
     document.getElementById('product-modal-title').innerText = "Add Product";
     document.getElementById('edit-product-id').value = ""; // Clear ID
     document.getElementById('btn-delete-product').style.display = 'none'; // Hide Delete
@@ -290,17 +347,47 @@ document.getElementById('add-product-btn').onclick = () => {
     document.querySelector('input[name="sku"]').value = 'PROD-' + Math.floor(1000 + Math.random() * 9000);
 };
 
-// Open Modal for EDIT
+// 2. Open Modal for EDIT
 window.openEditProductModal = (id) => {
     const product = inventoryData.find(p => p._id === id);
     if(!product) return;
+
+    // Reset the form first to clear old file selections from previous edits
+    document.getElementById('add-product-form').reset();
 
     document.getElementById('product-modal').style.display = 'block';
     document.getElementById('product-modal-title').innerText = "Edit Product";
     document.getElementById('edit-product-id').value = product._id;
     document.getElementById('btn-delete-product').style.display = 'block'; // Show Delete
     
-    // Fill Fields
+    // --- IMAGE PREVIEW LOGIC ---
+    const previewBox = document.getElementById('modal-img-preview');
+    const previewImg = document.getElementById('current-img-display');
+    const fileInput = document.querySelector('input[name="image"]');
+    
+    // 1. Clear any "newly uploaded" file from the input
+    if(fileInput) fileInput.value = '';
+
+    // 2. Show the EXISTING image from database
+    let existingImg = 'https://placehold.co/100?text=No+Img';
+    if (product.images && product.images.length > 0) {
+        existingImg = product.images[0];
+    } else if (product.imageUrl && product.imageUrl !== 'uploads/products/no-image.jpg') {
+        existingImg = product.imageUrl;
+    }
+    
+    // Fix path
+    if (!existingImg.startsWith('http') && !existingImg.startsWith('/')) {
+        existingImg = '/' + existingImg;
+    }
+
+    if(previewBox && previewImg) {
+        previewImg.src = existingImg;
+        previewBox.style.display = 'block';
+    }
+    // ---------------------------
+
+    // Fill Text Fields
     document.getElementById('p-name').value = product.itemName;
     document.getElementById('p-sku').value = product.sku;
     document.getElementById('p-price').value = product.price;
@@ -316,7 +403,6 @@ window.openEditProductModal = (id) => {
             addSpecField(key, val);
         });
     }
-    // Always add one empty row at bottom for convenience
     if(container.children.length === 0) addSpecField();
 };
 
@@ -336,7 +422,8 @@ function addSpecField(key = '', val = '') {
     div.querySelector('.remove-spec').addEventListener('click', function() { this.parentElement.remove(); });
     container.appendChild(div);
 }
-document.getElementById('add-spec-btn').addEventListener('click', () => addSpecField());
+const addSpecBtn = document.getElementById('add-spec-btn');
+if (addSpecBtn) addSpecBtn.addEventListener('click', () => addSpecField());
 
 // Handle Form Submit (Create OR Update)
 document.getElementById('add-product-form').addEventListener('submit', async (e) => {
@@ -392,6 +479,10 @@ document.getElementById('btn-delete-product').onclick = async () => {
 };
 
 
+// ========================
+// 5. ORDERS LOGIC
+// ========================
+
 async function loadOrders(silent) {
     try {
         const res = await fetch('/api/orders/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -404,8 +495,6 @@ async function loadOrders(silent) {
                 const tr = document.createElement('tr');
                 
                 // --- NEW ORDER ACTION UI ---
-                // We create a specific ID for the select box to grab its value later
-                // We added a "Save" button to trigger the update
                 const actionHtml = `
                     <div style="display:flex; gap:5px; align-items:center;">
                         <select id="status-select-${o._id}" style="padding:5px; border:1px solid #cbd5e1; border-radius:6px;">
@@ -437,8 +526,47 @@ async function loadOrders(silent) {
     } catch (err) { console.error(err); }
 }
 
+window.submitOrderStatus = async (id) => {
+    const selectEl = document.getElementById(`status-select-${id}`);
+    const newStatus = selectEl.value;
+    const btn = selectEl.nextElementSibling;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`/api/orders/admin/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+            logEvent(`Order #${id.slice(-4)} updated to ${newStatus}`);
+            loadOrders(true);
+        } else {
+            alert('Update Failed: ' + data.message);
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Network Error');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+};
+
+function getStatusColor(status) {
+    if (status === 'Pending') return 'var(--warning)';
+    if (status === 'Shipped') return 'var(--primary)';
+    if (status === 'Delivered') return 'var(--success)';
+    return 'var(--danger)';
+}
+
+
 // ========================
-// SECTION: USERS LOGIC
+// 6. USERS LOGIC
 // ========================
 
 async function loadUsers(silent) {
@@ -510,17 +638,34 @@ window.saveUserRole = async () => {
 // Trigger Password Reset
 window.triggerPasswordReset = () => {
     const id = document.getElementById('manage-user-id').value;
-    const email = document.getElementById('u-detail-email').innerText;
     
     // Close Details, Open Reset
     document.getElementById('user-details-modal').style.display = 'none';
     
     document.getElementById('reset-user-id').value = id;
-    // We don't have an element to show email in reset modal in previous code, but logical flow:
     document.getElementById('password-modal').style.display = 'block';
 };
 
-// Trigger Delete
+// Submit Password Reset
+document.getElementById('reset-pass-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('reset-user-id').value;
+    const newPass = document.getElementById('reset-new-pass').value;
+
+    const res = await fetch(`/api/users/${id}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ newPassword: newPass })
+    });
+    if(res.ok) {
+        alert('Password Updated');
+        document.getElementById('password-modal').style.display = 'none';
+    } else {
+        alert('Failed to reset password');
+    }
+});
+
+// Trigger User Delete
 window.triggerUserDelete = async () => {
     const id = document.getElementById('manage-user-id').value;
     if(confirm('Delete user PERMANENTLY?')) {
@@ -529,15 +674,17 @@ window.triggerUserDelete = async () => {
     }
 };
 
-// Open Create User Modal (The button "Create User" calls this)
+
+// --- CREATE USER LOGIC (Fixed) ---
+
 // 1. Open Create User Modal
 window.openUserModal = () => {
     const modal = document.getElementById('user-create-modal');
     if (modal) {
         modal.style.display = 'block';
-        document.getElementById('create-user-form').reset(); // Clear previous inputs
+        document.getElementById('create-user-form').reset(); 
     } else {
-        console.error("Error: Modal with ID 'user-create-modal' not found.");
+        console.error("Error: Modal 'user-create-modal' not found.");
     }
 };
 
@@ -575,201 +722,20 @@ if (createUserForm) {
             }
         } catch (err) {
             console.error(err);
-            alert('Network Error: Failed to create user');
+            alert('Network Error');
         }
     });
-}// --- STANDARD ACTIONS ---
-
-// New function to handle manual order status submission
-window.submitOrderStatus = async (id) => {
-    const selectEl = document.getElementById(`status-select-${id}`);
-    const newStatus = selectEl.value;
-
-    const btn = selectEl.nextElementSibling; // The save button
-    const originalContent = btn.innerHTML;
-    btn.innerHTML = '...';
-    btn.disabled = true;
-
-    try {
-        const res = await fetch(`/api/orders/admin/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ status: newStatus })
-        });
-
-        const data = await res.json();
-        
-        if (data.success) {
-            logEvent(`Order #${id.slice(-4)} updated to ${newStatus}`);
-            // Note: The socket broadcast from backend will trigger a full table reload,
-            // so we don't necessarily need to reload manually, but we do so for instant feedback.
-            loadOrders(true);
-        } else {
-            alert('Update Failed: ' + data.message);
-            btn.innerHTML = originalContent;
-            btn.disabled = false;
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Network Error');
-        btn.innerHTML = originalContent;
-        btn.disabled = false;
-    }
-};
-
-function addSpecField() {
-    const container = document.getElementById('specs-container');
-    const div = document.createElement('div');
-    div.className = 'spec-row';
-    div.style.display = 'grid';
-    div.style.gridTemplateColumns = '1fr 1fr 30px';
-    div.style.gap = '10px';
-    div.innerHTML = `
-        <input type="text" placeholder="Spec Name" class="form-control spec-key">
-        <input type="text" placeholder="Value" class="form-control spec-val">
-        <button type="button" class="remove-spec" style="background:var(--danger); color:white; border:none; border-radius:4px; cursor:pointer;">&times;</button>
-    `;
-    div.querySelector('.remove-spec').addEventListener('click', function() { this.parentElement.remove(); });
-    container.appendChild(div);
 }
-const addSpecBtn = document.getElementById('add-spec-btn');
-if (addSpecBtn) addSpecBtn.addEventListener('click', addSpecField);
-
-document.getElementById('add-product-btn').onclick = () => {
-    document.getElementById('product-modal').style.display = 'block';
-    document.getElementById('add-product-form').reset();
-    document.getElementById('specs-container').innerHTML = '';
-    addSpecField();
-    const skuInput = document.querySelector('input[name="sku"]');
-    if(skuInput) skuInput.value = 'PROD-' + Math.floor(1000 + Math.random() * 9000);
-};
-
-document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const currentToken = localStorage.getItem('vault_token');
-    if (!currentToken) return window.location.href = 'login.html';
-
-    const formData = new FormData(e.target);
-    const specsObj = {};
-    document.querySelectorAll('.spec-row').forEach(row => {
-        const key = row.querySelector('.spec-key').value.trim();
-        const val = row.querySelector('.spec-val').value.trim();
-        if (key && val) specsObj[key] = val;
-    });
-    formData.append('specs', JSON.stringify(specsObj));
-
-    try {
-        const res = await fetch('/api/products', { 
-            method: 'POST', 
-            headers: { 'Authorization': `Bearer ${currentToken}` },
-            body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-            alert('Product Added');
-            document.getElementById('product-modal').style.display = 'none';
-            // The socket will handle reload, but we can do it locally too
-        } else {
-            alert('Error: ' + data.message);
-        }
-    } catch (err) { console.error(err); alert('Upload Failed'); }
-});
-
-window.deleteProduct = async (id) => {
-    if(confirm('Delete?')) {
-        await fetch(`/api/products/${id}`, { 
-            method: 'DELETE', 
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } 
-        });
-        // The socket will trigger auto-update
-    }
-}
-
-function getStatusColor(status) {
-    if (status === 'Pending') return 'var(--warning)';
-    if (status === 'Shipped') return 'var(--primary)';
-    if (status === 'Delivered') return 'var(--success)';
-    return 'var(--danger)';
-}
-
-window.changeRole = async (id, role) => {
-    if(confirm(`Change role to ${role}?`)) {
-        await fetch(`/api/users/${id}/role`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ role })
-        });
-    }
-};
-
-window.deleteUser = async (id) => {
-    if(confirm('Delete user PERMANENTLY?')) {
-        await fetch(`/api/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-    }
-};
-
-window.openUserModal = () => document.getElementById('user-modal').style.display = 'block';
-document.getElementById('create-user-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const payload = {
-        fullName: document.getElementById('new-name').value,
-        email: document.getElementById('new-email').value,
-        password: document.getElementById('new-pass').value,
-        role: document.getElementById('new-role').value
-    };
-    const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if(res.ok) {
-        alert('User Created');
-        document.getElementById('user-modal').style.display = 'none';
-    } else {
-        alert(data.message);
-    }
-});
-
-window.openPassModal = (id, email) => {
-    document.getElementById('reset-user-id').value = id;
-    document.getElementById('reset-user-email').innerText = email;
-    document.getElementById('password-modal').style.display = 'block';
-};
-
-document.getElementById('reset-pass-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('reset-user-id').value;
-    const newPass = document.getElementById('reset-new-pass').value;
-
-    const res = await fetch(`/api/users/${id}/password`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ newPassword: newPass })
-    });
-    if(res.ok) {
-        alert('Password Updated');
-        document.getElementById('password-modal').style.display = 'none';
-    }
-});
-
-window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-document.getElementById('logout-btn').onclick = () => {
-    localStorage.clear();
-    window.location.href = 'login.html';
-};
 
 
 // ========================
-// SECTION: ANALYTICS & CHARTS
+// 7. ANALYTICS & CHARTS
 // ========================
 
 let salesChartInstance = null;
 let categoryChartInstance = null;
 
-
 async function loadAnalytics() {
-    // Safety check: Do nothing if the canvas elements don't exist
     if(!document.getElementById('salesChart')) return;
 
     try {
@@ -784,7 +750,6 @@ async function loadAnalytics() {
         const topRes = await fetch('/api/analytics/top-products', { headers });
         const topData = await topRes.json();
 
-        // FIX: Ensure we have arrays even if API returns null/undefined
         renderSalesChart(trendData.data || []);
         renderCategoryChart(catData.data || []);
         renderTopProducts(topData.data || []);
@@ -856,7 +821,7 @@ function renderTopProducts(data) {
 }
 
 // ========================
-// SECTION: EXPORT TOOLS
+// 8. EXPORT TOOLS
 // ========================
 
 window.exportCSV = async (type) => {

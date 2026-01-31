@@ -370,9 +370,11 @@ button,
   backdrop-filter: blur(4px);
 }
 
+/* --- REPLACE THIS BLOCK IN public/css/style.css --- */
+
 .modal-content {
   background-color: white;
-  margin: 5vh auto;
+  margin: 2vh auto; /* Reduced margin to give more space */
   padding: 2rem;
   border-radius: 16px;
   width: 90%;
@@ -380,6 +382,28 @@ button,
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.3s ease-out;
+
+  /* --- NEW SCROLLING LOGIC --- */
+  max-height: 95vh;       /* Limit height to 95% of the viewport */
+  overflow-y: auto;       /* Enable vertical scrolling */
+  scrollbar-width: thin;  /* For Firefox (thinner scrollbar) */
+}
+
+/* Optional: Make the scrollbar look nicer on Chrome/Edge */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }
 
 @keyframes slideUp {
