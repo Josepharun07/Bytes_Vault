@@ -1592,12 +1592,14 @@ body.auth-page {
 
 /* --- SYSTEM VIEW FIXES --- */
 
-/* 1. Layout Structure: Ensure both sides stretch to equal height */
+
+
+/* 1. Layout Structure */
 .system-split-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.3fr 1fr; 
     gap: 1.5rem;
-    align-items: stretch; /* This forces the Log card to match the height of the left grid */
+    align-items: start; /* Align to top so they don't stretch weirdly */
 }
 
 .system-right-panel {
@@ -1605,65 +1607,66 @@ body.auth-page {
     flex-direction: column;
 }
 
-/* 2. Log Card Sizing */
+/* 2. Log Card: FIXED HEIGHT */
 .log-card {
-    height: 100%;       /* Fill parent */
-    min-height: 500px;  /* Force it to be taller visually */
+    /* Setting a fixed height prevents the page from expanding infinitely */
+    height: 750px;       
     display: flex;
     flex-direction: column;
-}
-
-#sync-logs {
-    flex-grow: 1;       /* Fill the empty space inside the card */
-    max-height: 600px;  /* Keep scrolling if it gets massive */
-}
-
-/* 3. Stat Card Internal Layout (Prevent overlap) */
-.system-stats-grid .stat-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Align to top so large text doesn't center weirdly */
-    gap: 10px;
-    min-height: 140px; /* Force all cards to be a consistent uniform height */
-}
-
-/* Fix the text container width so it doesn't hit the icon */
-.system-stats-grid .stat-card > div:first-child {
-    flex: 1;
-    min-width: 0; /* Allows text wrap to work in flexbox */
-}
-
-/* 4. Typography Control: Make the big text fit */
-.system-stats-grid .stat-card h3 {
-    font-size: 1.5rem !important; /* Smaller than the standard 2rem */
-    word-wrap: break-word;        /* Break long words like 'development' */
-    overflow-wrap: break-word;
-    line-height: 1.2;
-    margin-top: 5px;
-}
-
-/* Make the label (e.g., "Last Data Sync") smaller */
-.system-stats-grid .stat-card p {
-    font-size: 0.85rem;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    padding-bottom: 0; /* Remove bottom padding so log hits the edge */
 }
 
-/* Responsive: On tablets, make the grid 2 columns instead of auto-squeezing */
-@media (max-width: 1200px) {
-    .system-stats-grid {
-        grid-template-columns: 1fr 1fr; 
-    }
+/* 3. The Log Container: Scrollable & Contained */
+#sync-logs {
+    flex-grow: 1;        /* Take up all remaining space in the 600px card */
+    height: 100%;        /* Ensure it fills the flex parent */
+    
+    /* SCROLLING */
+    overflow-y: auto;    /* Scrollbar appears INSIDE this box */
+    
+    /* TEXT CONTAINMENT */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    white-space: pre-wrap;
+    
+    /* Styling */
+    background: #0f172a;
+    color: #4ade80;
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    padding: 1.5rem;
+    border-radius: 0 0 12px 12px; /* Rounded bottom corners to match card */
+    border-top: 1px solid #334155;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    font-size: 0.9rem;
+    margin: 0 -1.5rem -1.5rem -1.5rem; /* Bleed to edges of card */
 }
 
-/* Stack everything on mobile */
-@media (max-width: 900px) {
+/* Scrollbar Styling */
+#sync-logs::-webkit-scrollbar {
+    width: 10px;
+}
+#sync-logs::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+#sync-logs::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 5px;
+    border: 2px solid #1e293b;
+}
+#sync-logs::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
     .system-split-layout {
         grid-template-columns: 1fr;
     }
+    /* On mobile, let it be smaller */
     .log-card {
-        min-height: 300px;
+        height: 400px;
     }
 }
 
