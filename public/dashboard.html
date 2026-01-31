@@ -245,8 +245,9 @@
             <h2 style="margin-bottom: 1.5rem;">Add Product</h2>
             <form id="add-product-form" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label>Product Image</label>
-                    <input type="file" name="image" class="form-control" accept="image/*" required>
+                    <label>Product Images (Select multiple)</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" multiple required>
+                    <p style="font-size:0.8rem; color:#64748b; margin-top:5px;">Hold Ctrl (Cmd) to select multiple files.</p>
                 </div>
                 <div class="form-group">
                     <label>Product Name</label>

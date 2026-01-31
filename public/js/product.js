@@ -2,6 +2,8 @@
 
 const id = new URLSearchParams(window.location.search).get("id");
 let currentProduct = null; 
+let currentImageIndex = 0;
+let productImages = [];
 
 // 1. Helper: Stock Badge
 function getStockBadge(stock) {
@@ -17,21 +19,48 @@ function renderStars(rating) {
   let stars = '';
   for (let i = 0; i < 5; i++) {
     if (i < full) stars += '★';
-    else if (i === full && half) stars += '☆'; // You can use a half-star char if available
+    else if (i === full && half) stars += '☆'; 
     else stars += '☆';
   }
   return `<span class="stars" aria-label="Rating ${rating.toFixed(1)}">${stars}</span>`;
 }
 
-// 3. Main Load Function
+// 3. Image Slider Logic
+function updateGalleryImage() {
+  const imgEl = document.getElementById('main-product-img');
+  const counterEl = document.getElementById('img-counter');
+  
+  if(imgEl && productImages.length > 0) {
+    let src = productImages[currentImageIndex];
+    // Path fix
+    if (!src.startsWith('http') && !src.startsWith('/')) src = '/' + src;
+    imgEl.src = src;
+  }
+  
+  if(counterEl) {
+    counterEl.innerText = `${currentImageIndex + 1} / ${productImages.length}`;
+  }
+}
+
+function nextImage() {
+  if(productImages.length <= 1) return;
+  currentImageIndex = (currentImageIndex + 1) % productImages.length;
+  updateGalleryImage();
+}
+
+function prevImage() {
+  if(productImages.length <= 1) return;
+  currentImageIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
+  updateGalleryImage();
+}
+
+// 4. Main Load Function
 async function loadProduct() {
   if (!id) return;
 
   try {
-    const res = await fetch(`/api/products`); // Fetching all to find one (simplest for now)
+    const res = await fetch(`/api/products`);
     const result = await res.json();
-    
-    // Find product manually from list
     const product = result.data ? result.data.find(p => p._id === id) : null;
 
     if (!product) {
@@ -41,20 +70,20 @@ async function loadProduct() {
 
     currentProduct = product; 
 
-    // FIX: Use correct path separator (/) not (\)
-    let imgUrl = 'https://placehold.co/600x400?text=No+Image';
-
-     if (product.images && product.images.length > 0) {
-        imgUrl = product.images[0];
+    // --- PREPARE IMAGES ARRAY ---
+    if (product.images && product.images.length > 0) {
+        productImages = product.images;
     } else if (product.imageUrl && product.imageUrl !== 'uploads/products/no-image.jpg') {
-        imgUrl = product.imageUrl;
+        productImages = [product.imageUrl];
+    } else {
+        productImages = ['https://placehold.co/600x400?text=No+Image'];
     }
 
-    // Fix pathing
-    if (!imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
-        imgUrl = '/' + imgUrl;
-    }
-    // Render Specs
+    // --- RENDER HTML ---
+    // Note: We conditionally render buttons only if > 1 image
+    const showControls = productImages.length > 1 ? '' : 'display:none;';
+
+    // Specs HTML
     let specsHtml = '';
     if (product.specs) {
       const entries = typeof product.specs === 'object' ? product.specs : {};
@@ -66,12 +95,20 @@ async function loadProduct() {
       `).join("");
     }
 
-    // Render Product HTML
     document.getElementById("product-container").innerHTML = `
       <div class="product-image-section">
           ${getStockBadge(product.stockCount)}
-          <img src="${imgUrl}" alt="${product.itemName}" class="product-image" onerror="this.src='https://placehold.co/400'"/>
+          
+          <div class="gallery-container">
+            <img id="main-product-img" src="" alt="${product.itemName}" class="product-image" onerror="this.src='https://placehold.co/600x400?text=Image+Error'"/>
+            
+            <button class="slider-btn prev-btn" id="btn-prev" style="${showControls}">&#10094;</button>
+            <button class="slider-btn next-btn" id="btn-next" style="${showControls}">&#10095;</button>
+            
+            <div id="img-counter" class="image-counter" style="${showControls}">1 / ${productImages.length}</div>
+          </div>
       </div>
+
       <div class="product-info-section">
         <h1 class="product-title">${product.itemName}</h1>
         
@@ -101,12 +138,19 @@ async function loadProduct() {
       </div>
     `;
 
-    // Attach Cart Listener
+    // Initialize first image
+    updateGalleryImage();
+
+    // Attach Listeners
     document.getElementById('add-to-cart-btn')?.addEventListener('click', () => {
       Cart.add(currentProduct);
     });
 
-    // --- REVIEWS LOGIC ---
+    if(productImages.length > 1) {
+        document.getElementById('btn-prev').addEventListener('click', prevImage);
+        document.getElementById('btn-next').addEventListener('click', nextImage);
+    }
+
     renderReviews(product);
 
   } catch (err) {
@@ -115,7 +159,7 @@ async function loadProduct() {
   }
 }
 
-// 4. Render Reviews & Form
+// 5. Render Reviews & Form (Same as before)
 function renderReviews(product) {
     const reviews = product.reviews || [];
     const reviewList = document.getElementById('reviews-list');
@@ -135,16 +179,11 @@ function renderReviews(product) {
       reviewList.innerHTML = '<p style="color:#777; font-style:italic;">No reviews yet. Be the first!</p>';
     }
 
-    // Review Form Logic
     const token = localStorage.getItem('vault_token');
     const wrapper = document.getElementById('review-form-wrapper');
     
     if (!token) {
-      wrapper.innerHTML = `
-        <div class="login-prompt">
-          <p>Please <a href="login.html" style="color:var(--vault-blue);">Log In</a> to write a review.</p>
-        </div>
-      `;
+      wrapper.innerHTML = `<div class="login-prompt"><p>Please <a href="login.html" style="color:var(--primary);">Log In</a> to write a review.</p></div>`;
     } else {
       wrapper.innerHTML = `
         <h3 style="margin-bottom:1rem;">Write a Review</h3>
@@ -167,32 +206,24 @@ function renderReviews(product) {
         </form>
       `;
 
-      // Handle Submit
       document.getElementById('review-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
         window.Loaders?.start(btn, 'Submitting...');
 
         const formData = new FormData(e.target);
-        const payload = {
-          rating: formData.get('rating'),
-          comment: formData.get('comment')
-        };
+        const payload = { rating: formData.get('rating'), comment: formData.get('comment') };
 
         try {
           const r = await fetch(`/api/products/${id}/reviews`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(payload)
           });
-          
           const out = await r.json();
           if (out.success) {
             alert('Review submitted!');
-            location.reload(); // Reload to see new review
+            location.reload(); 
           } else {
             alert(out.message || 'Error submitting review');
           }

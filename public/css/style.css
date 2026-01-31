@@ -1504,3 +1504,62 @@ body.auth-page {
   align-items: center;
   min-height: 80vh;
 }
+
+
+/* --- PRODUCT GALLERY SLIDER --- */
+.gallery-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #0b1220;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Keeps aspect ratio */
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+  z-index: 10;
+  user-select: none;
+}
+
+.slider-btn:hover {
+  background: rgba(37, 99, 235, 0.9); /* Primary color */
+}
+
+.prev-btn { left: 10px; }
+.next-btn { right: 10px; }
+
+.image-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  pointer-events: none;
+}
