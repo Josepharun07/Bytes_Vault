@@ -536,28 +536,27 @@ document.getElementById('logout-btn').onclick = () => {
 let salesChartInstance = null;
 let categoryChartInstance = null;
 
+
 async function loadAnalytics() {
-    // Only load charts if we are in dashboard view to save resources
+    // Safety check: Do nothing if the canvas elements don't exist
     if(!document.getElementById('salesChart')) return;
 
     try {
         const headers = { 'Authorization': `Bearer ${token}` };
 
-        // 1. Fetch Trend Data
         const trendRes = await fetch('/api/analytics/trend', { headers });
         const trendData = await trendRes.json();
 
-        // 2. Fetch Category Data
         const catRes = await fetch('/api/analytics/categories', { headers });
         const catData = await catRes.json();
 
-        // 3. Fetch Top Products
         const topRes = await fetch('/api/analytics/top-products', { headers });
         const topData = await topRes.json();
 
-        if (trendData.success) renderSalesChart(trendData.data);
-        if (catData.success) renderCategoryChart(catData.data);
-        if (topData.success) renderTopProducts(topData.data);
+        // FIX: Ensure we have arrays even if API returns null/undefined
+        renderSalesChart(trendData.data || []);
+        renderCategoryChart(catData.data || []);
+        renderTopProducts(topData.data || []);
 
     } catch (err) {
         console.error("Analytics Error:", err);
