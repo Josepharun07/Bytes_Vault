@@ -82,7 +82,7 @@ app.use((err, req, res, next) => {
 
 // 7. Server Activation
 const SYSTEM_PORT = process.env.PORT || 3000;
-const BASE_URL = `http://localhost:${SYSTEM_PORT}`;
+const BASE_URL = `http://20.2.235.215:${SYSTEM_PORT}`;
 
 if (require.main === module) {
     server.listen(SYSTEM_PORT, () => {
