@@ -95,32 +95,6 @@ exports.updateUserRole = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
-    
-    // Input validation
-    if (!fullName || !email || !password || !role) {
-      return sendError(res, 400, "All fields are required");
-    }
-    
-    if (fullName.trim().length < 2) {
-      return sendError(res, 400, "Full name must be at least 2 characters");
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return sendError(res, 400, "Invalid email format");
-    }
-    
-    // Password validation
-    if (password.length < 6) {
-      return sendError(res, 400, "Password must be at least 6 characters");
-    }
-    
-    // Role validation
-    if (!['customer', 'admin'].includes(role)) {
-      return sendError(res, 400, "Invalid role");
-    }
-    
     const hashedPassword = await hashPassword(password);
 
     const user = await User.create({
@@ -163,16 +137,6 @@ exports.deleteUser = async (req, res) => {
 exports.resetUserPassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
-    
-    // Input validation
-    if (!newPassword) {
-      return sendError(res, 400, "New password is required");
-    }
-    
-    if (newPassword.length < 6) {
-      return sendError(res, 400, "Password must be at least 6 characters");
-    }
-    
     const user = await User.findById(req.params.id);
     if (!user) return sendError(res, 404, "User not found");
 
