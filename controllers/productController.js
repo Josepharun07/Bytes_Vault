@@ -24,18 +24,53 @@ exports.createCatalogItem = async (req, res) => {
     try {
         const { name, sku, price, stock, category, description, specs } = req.body;
         
+        // Input validation
+        if (!name || !sku || price === undefined || stock === undefined || !category || !description) {
+            return res.status(400).json({ success: false, message: 'All required fields must be provided' });
+        }
+        
+        if (name.trim().length < 2) {
+            return res.status(400).json({ success: false, message: 'Product name must be at least 2 characters' });
+        }
+        
+        if (sku.trim().length < 2) {
+            return res.status(400).json({ success: false, message: 'SKU must be at least 2 characters' });
+        }
+        
+        // Numeric validation
+        const priceNum = Number(price);
+        const stockNum = Number(stock);
+        
+        if (isNaN(priceNum) || priceNum < 0) {
+            return res.status(400).json({ success: false, message: 'Price must be a positive number' });
+        }
+        
+        if (isNaN(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) {
+            return res.status(400).json({ success: false, message: 'Stock must be a positive integer' });
+        }
+        
+        // Category validation
+        const validCategories = ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software'];
+        if (!validCategories.includes(category)) {
+            return res.status(400).json({ success: false, message: 'Invalid category' });
+        }
+        
+        if (description.trim().length < 10) {
+            return res.status(400).json({ success: false, message: 'Description must be at least 10 characters' });
+        }
+        
         let parsedSpecs = specs;
         if (typeof specs === 'string') {
             try { parsedSpecs = JSON.parse(specs); } catch (e) { parsedSpecs = {}; }
         }
 
         createdProduct = await Product.create({
-            itemName: name,
-            sku,
-            price,
-            stockCount: stock,
+            itemName: name.trim(),
+            sku: sku.trim().toUpperCase(),
+            price: priceNum,
+            stockCount: stockNum,
             category,
-            description,
+            description: description.trim(),
             // FIX 1: Use a reliable online placeholder if no image
             images: ['https://placehold.co/600x400?text=No+Image'], 
             specs: parsedSpecs
@@ -122,11 +157,48 @@ exports.updateCatalogItem = async (req, res) => {
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
-        if(name) product.itemName = name;
-        if(price) product.price = price;
-        if(stock) product.stockCount = stock;
-        if(description) product.description = description;
-        if(category) product.category = category;
+        // Validate name
+        if (name !== undefined) {
+            if (!name || name.trim().length < 2) {
+                return res.status(400).json({ success: false, message: 'Product name must be at least 2 characters' });
+            }
+            product.itemName = name.trim();
+        }
+        
+        // Validate price
+        if (price !== undefined) {
+            const priceNum = Number(price);
+            if (isNaN(priceNum) || priceNum < 0) {
+                return res.status(400).json({ success: false, message: 'Price must be a positive number' });
+            }
+            product.price = priceNum;
+        }
+        
+        // Validate stock
+        if (stock !== undefined) {
+            const stockNum = Number(stock);
+            if (isNaN(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) {
+                return res.status(400).json({ success: false, message: 'Stock must be a positive integer' });
+            }
+            product.stockCount = stockNum;
+        }
+        
+        // Validate description
+        if (description !== undefined) {
+            if (!description || description.trim().length < 10) {
+                return res.status(400).json({ success: false, message: 'Description must be at least 10 characters' });
+            }
+            product.description = description.trim();
+        }
+        
+        // Validate category
+        if (category !== undefined) {
+            const validCategories = ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software'];
+            if (!validCategories.includes(category)) {
+                return res.status(400).json({ success: false, message: 'Invalid category' });
+            }
+            product.category = category;
+        }
 
         if (req.files && req.files.length > 0) {
             const productId = product._id.toString();
@@ -162,6 +234,21 @@ exports.updateCatalogItem = async (req, res) => {
 exports.createProductReview = async (req, res) => {
     try {
         const { rating, comment } = req.body;
+        
+        // Input validation
+        if (!rating || !comment) {
+            return res.status(400).json({ success: false, message: 'Rating and comment are required' });
+        }
+        
+        const ratingNum = Number(rating);
+        if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+            return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+        }
+        
+        if (comment.trim().length < 5) {
+            return res.status(400).json({ success: false, message: 'Comment must be at least 5 characters' });
+        }
+        
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
@@ -170,8 +257,8 @@ exports.createProductReview = async (req, res) => {
 
         const review = {
             name: req.user.fullName,
-            rating: Number(rating),
-            comment,
+            rating: ratingNum,
+            comment: comment.trim(),
             user: req.user._id,
         };
 
