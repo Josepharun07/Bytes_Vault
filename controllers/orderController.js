@@ -15,10 +15,53 @@ const notifyClients = (req, type, message) => {
 exports.createOrder = async (req, res) => {
     try {
         const { cartItems, shippingAddress } = req.body;
+        
+        // Input validation
+        if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+            return res.status(400).json({ success: false, message: 'Cart items are required' });
+        }
+        
+        if (!shippingAddress) {
+            return res.status(400).json({ success: false, message: 'Shipping address is required' });
+        }
+        
+        // Validate shipping address fields
+        const { fullName, address, city, zip } = shippingAddress;
+        if (!fullName || !address || !city || !zip) {
+            return res.status(400).json({ success: false, message: 'All shipping address fields are required' });
+        }
+        
+        if (fullName.trim().length < 2) {
+            return res.status(400).json({ success: false, message: 'Full name must be at least 2 characters' });
+        }
+        
+        if (address.trim().length < 5) {
+            return res.status(400).json({ success: false, message: 'Address must be at least 5 characters' });
+        }
+        
+        if (city.trim().length < 2) {
+            return res.status(400).json({ success: false, message: 'City must be at least 2 characters' });
+        }
+        
+        if (zip.trim().length < 3) {
+            return res.status(400).json({ success: false, message: 'ZIP code must be at least 3 characters' });
+        }
+        
         let totalAmount = 0;
         let orderItems = [];
 
         for (const item of cartItems) {
+            // Validate cart item structure
+            if (!item._id || !item.qty) {
+                return res.status(400).json({ success: false, message: 'Invalid cart item format' });
+            }
+            
+            // Validate quantity
+            const qty = Number(item.qty);
+            if (isNaN(qty) || qty < 1 || !Number.isInteger(qty)) {
+                return res.status(400).json({ success: false, message: 'Quantity must be a positive integer' });
+            }
+            
             const product = await Product.findById(item._id);
             
             // Validate Product
@@ -27,21 +70,21 @@ exports.createOrder = async (req, res) => {
             }
             
             // Validate Stock
-            if (product.stockCount < item.qty) {
+            if (product.stockCount < qty) {
                 // --- FIX 1: Match the test expectation string ---
                 return res.status(400).json({ success: false, message: `Insufficient stock for: ${item.itemName}` });
             }
 
             // Deduct
-            product.stockCount -= item.qty;
+            product.stockCount -= qty;
             await product.save();
             
-            totalAmount += product.price * item.qty;
+            totalAmount += product.price * qty;
             orderItems.push({
                 product: product._id,
                 itemName: product.itemName,
                 price: product.price,
-                qty: item.qty
+                qty: qty
             });
         }
 
@@ -80,10 +123,23 @@ exports.getAllOrders = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
     try {
+        const { status } = req.body;
+        
+        // Input validation
+        if (!status) {
+            return res.status(400).json({ success: false, message: 'Status is required' });
+        }
+        
+        // Validate status value
+        const validStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status' });
+        }
+        
         const order = await Order.findById(req.params.id);
         if(!order) return res.status(404).json({ success: false, message: 'Order not found' });
         
-        order.status = req.body.status;
+        order.status = status;
         await order.save();
         
         // --- FIX 2: Match the test expectation string ---
