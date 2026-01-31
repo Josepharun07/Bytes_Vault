@@ -131,6 +131,8 @@ When writing queries or frontend displays, strictly use these field names:
     *   `protect`: Decodes JWT, finds user, attaches to `req.user`.
     *   `admin`: Checks if `req.user.privilegeLevel === 'admin'`.
 *   **`uploadMiddleware.js`**: Configures `Multer` to save files to `public/uploads/products` with unique timestamps.
+*   **`loginRateLimiter.js`**: Prevents abuse by limiting the number of login attempts per user or IP within a defined time window, helping protect against brute-force attacks and service overload.
+
 
 ### Frontend Scripts
 *   **`admin.js`**: The SPA (Single Page Application) engine for the Dashboard. Handles Tab switching and Data loading.
