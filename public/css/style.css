@@ -1563,3 +1563,81 @@ body.auth-page {
   font-weight: 600;
   pointer-events: none;
 }
+
+
+/* --- SYSTEM VIEW FIXES --- */
+
+/* 1. Layout Structure: Ensure both sides stretch to equal height */
+.system-split-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    align-items: stretch; /* This forces the Log card to match the height of the left grid */
+}
+
+.system-right-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Log Card Sizing */
+.log-card {
+    height: 100%;       /* Fill parent */
+    min-height: 500px;  /* Force it to be taller visually */
+    display: flex;
+    flex-direction: column;
+}
+
+#sync-logs {
+    flex-grow: 1;       /* Fill the empty space inside the card */
+    max-height: 600px;  /* Keep scrolling if it gets massive */
+}
+
+/* 3. Stat Card Internal Layout (Prevent overlap) */
+.system-stats-grid .stat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align to top so large text doesn't center weirdly */
+    gap: 10px;
+    min-height: 140px; /* Force all cards to be a consistent uniform height */
+}
+
+/* Fix the text container width so it doesn't hit the icon */
+.system-stats-grid .stat-card > div:first-child {
+    flex: 1;
+    min-width: 0; /* Allows text wrap to work in flexbox */
+}
+
+/* 4. Typography Control: Make the big text fit */
+.system-stats-grid .stat-card h3 {
+    font-size: 1.5rem !important; /* Smaller than the standard 2rem */
+    word-wrap: break-word;        /* Break long words like 'development' */
+    overflow-wrap: break-word;
+    line-height: 1.2;
+    margin-top: 5px;
+}
+
+/* Make the label (e.g., "Last Data Sync") smaller */
+.system-stats-grid .stat-card p {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive: On tablets, make the grid 2 columns instead of auto-squeezing */
+@media (max-width: 1200px) {
+    .system-stats-grid {
+        grid-template-columns: 1fr 1fr; 
+    }
+}
+
+/* Stack everything on mobile */
+@media (max-width: 900px) {
+    .system-split-layout {
+        grid-template-columns: 1fr;
+    }
+    .log-card {
+        min-height: 300px;
+    }
+}

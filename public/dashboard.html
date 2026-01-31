@@ -117,7 +117,7 @@
                         </div>
                     </div>
                 </div>
-            </section>>
+            </section>
 
         <!-- 2. INVENTORY VIEW -->
         <section id="view-inventory" class="view-section">
@@ -161,78 +161,90 @@
 
         <!-- 5. ENHANCED SYSTEM STATUS VIEW -->
         <section id="view-system" class="view-section">
-            <div class="stats-grid">
-                <!-- Row 1: Connection & Sync -->
-                <div class="stat-card" style="border-bottom: 4px solid var(--primary);">
-                    <div>
-                        <p>Database Status</p>
-                        <h3 id="sys-db-status">Checking...</h3>
-                    </div>
-                    <div class="stat-icon">🗄️</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid var(--success);">
-                    <div>
-                        <p>Last Data Sync</p>
-                        <h3 id="sys-last-sync">--:--:--</h3>
-                    </div>
-                    <div class="stat-icon">⏱️</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid var(--warning);">
-                    <div>
-                        <p>Connection Mode</p>
-                        <h3 id="sys-conn-type">Polling</h3>
-                    </div>
-                    <div class="stat-icon">⚡</div>
-                </div>
+    
+            <!-- New Wrapper for Split Layout -->
+            <div class="system-split-layout">
+                
+                <!-- LEFT SIDE: Metrics -->
+                <div class="system-left-panel">
+                    <div class="stats-grid system-stats-grid">
+                        <!-- Row 1: Connection & Sync -->
+                        <div class="stat-card" style="border-bottom: 4px solid var(--primary);">
+                         <div>
+                             <p>Database Status</p>
+                                <h3 id="sys-db-status">Checking...</h3>
+                            </div>
+                            <div class="stat-icon">🗄️</div>
+                        </div>
+                        <div class="stat-card" style="border-bottom: 4px solid var(--success);">
+                            <div>
+                                <p>Last Data Sync</p>
+                                <h3 id="sys-last-sync">--:--:--</h3>
+                            </div>
+                            <div class="stat-icon">⏱️</div>
+                        </div>
+                        <div class="stat-card" style="border-bottom: 4px solid var(--warning);">
+                            <div>
+                             <p>Connection Mode</p>
+                                <h3 id="sys-conn-type">Polling</h3>
+                            </div>
+                            <div class="stat-icon">⚡</div>
+                       </div>
+                        <div class="stat-card" style="border-bottom: 4px solid #8b5cf6;">
+                            <div>
+                                <p>Active Visitors</p>
+                             <h3 id="sys-active-users">0</h3>
+                            </div>
+                            <div class="stat-icon">🟢</div>
+                      </div>
 
-                <!-- Row 2: Deep Insights (NEW) -->
-                <div class="stat-card" style="border-bottom: 4px solid #8b5cf6;">
-                    <div>
-                        <p>Active Visitors</p>
-                        <h3 id="sys-active-users">0</h3>
-                    </div>
-                    <div class="stat-icon">🟢</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid #ec4899;">
-                    <div>
-                        <p>DB Latency</p>
-                        <h3 id="sys-latency">0 ms</h3>
-                    </div>
-                    <div class="stat-icon">📶</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid #14b8a6;">
-                    <div>
-                        <p>Server Uptime</p>
-                        <h3 id="sys-uptime" style="font-size: 1.5rem;">00:00:00</h3>
-                    </div>
-                    <div class="stat-icon">⏳</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid #64748b;">
-                    <div>
-                        <p>Total Records</p>
-                        <h3 id="sys-total-docs">0</h3>
-                    </div>
-                    <div class="stat-icon">📂</div>
-                </div>
-                <div class="stat-card" style="border-bottom: 4px solid #64748b;">
-                    <div>
-                        <p>Environment</p>
-                        <h3 id="sys-env">Dev</h3>
-                    </div>
-                    <div class="stat-icon">🛠️</div>
-                </div>
-            </div>
+                        <!-- Row 2: Deep Insights -->
+                      <div class="stat-card" style="border-bottom: 4px solid #ec4899;">
+                            <div>
+                                <p>DB Latency</p>
+                                <h3 id="sys-latency">0 ms</h3>
+                         </div>
+                            <div class="stat-icon">📶</div>
+                        </div>
+                        <div class="stat-card" style="border-bottom: 4px solid #14b8a6;">
+                            <div>
+                                <p>Server Uptime</p>
+                               <h3 id="sys-uptime" style="font-size: 1.2rem;">00:00:00</h3>
+                            </div>
+                          <div class="stat-icon">⏳</div>
+                        </div>
+                        <div class="stat-card" style="border-bottom: 4px solid #64748b;">
+                         <div>
+                                <p>Total Records</p>
+                                <h3 id="sys-total-docs">0</h3>
+                           </div>
+                            <div class="stat-icon">📂</div>
+                        </div>
+                        <div class="stat-card" style="border-bottom: 4px solid #64748b;">
+                         <div>
+                                <p>Environment</p>
+                                <h3 id="sys-env">Dev</h3>
+                            </div>
+                            <div class="stat-icon">🛠️</div>
+                      </div>
+                  </div>
+               </div>
 
-            <div class="card" style="margin-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3>Live Event Log</h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button onclick="manualSync()" id="sync-btn" class="btn-primary">🔄 Manual Sync</button>
-                        <button onclick="clearSystemLogs()" class="btn-secondary">Clear Logs</button>
-                    </div>
-                </div>
-                <div id="sync-logs"></div>
-            </div>
+               <!-- RIGHT SIDE: Logs -->
+             <div class="system-right-panel">
+                    <div class="card log-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Live Event Log</h3>
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="manualSync()" id="sync-btn" class="btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">🔄 Sync</button>
+                                <button onclick="clearSystemLogs()" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">🗑️</button>
+                             </div>
+                        </div>
+                     <div id="sync-logs"></div>
+                 </div>
+              </div>
+
+           </div>
         </section>
 
     </main>
