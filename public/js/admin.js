@@ -530,8 +530,55 @@ window.triggerUserDelete = async () => {
 };
 
 // Open Create User Modal (The button "Create User" calls this)
-window.openUserModal = () => document.getElementById('user-create-modal').style.display = 'block';
-// --- STANDARD ACTIONS ---
+// 1. Open Create User Modal
+window.openUserModal = () => {
+    const modal = document.getElementById('user-create-modal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.getElementById('create-user-form').reset(); // Clear previous inputs
+    } else {
+        console.error("Error: Modal with ID 'user-create-modal' not found.");
+    }
+};
+
+// 2. Handle Create User Form Submit
+const createUserForm = document.getElementById('create-user-form');
+if (createUserForm) {
+    createUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const payload = {
+            fullName: document.getElementById('new-name').value,
+            email: document.getElementById('new-email').value,
+            password: document.getElementById('new-pass').value,
+            role: document.getElementById('new-role').value
+        };
+
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                alert('User Created Successfully');
+                document.getElementById('user-create-modal').style.display = 'none';
+                loadUsers(); // Refresh the table
+            } else {
+                alert('Error: ' + (data.message || 'Failed to create user'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network Error: Failed to create user');
+        }
+    });
+}// --- STANDARD ACTIONS ---
 
 // New function to handle manual order status submission
 window.submitOrderStatus = async (id) => {
