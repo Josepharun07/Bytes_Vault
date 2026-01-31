@@ -68,6 +68,7 @@ body {
   font-weight: 800;
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   text-decoration: none;
   letter-spacing: -0.5px;
@@ -1640,4 +1641,46 @@ body.auth-page {
     .log-card {
         min-height: 300px;
     }
+}
+
+/* Interactive Rows */
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+    background-color: #f1f5f9; /* Light grey hover */
+    font-weight: 500;
+}
+
+/* User Details Modal Specifics */
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-group label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.detail-group div {
+    font-size: 1rem;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
 }

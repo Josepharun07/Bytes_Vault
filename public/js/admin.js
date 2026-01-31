@@ -4,6 +4,9 @@
 const token = localStorage.getItem('vault_token');
 const role = localStorage.getItem('vault_role');
 
+let inventoryData = [];
+let usersData = [];
+
 // Redirect if not admin
 if (!token || role !== 'admin') window.location.href = 'login.html';
 
@@ -228,6 +231,10 @@ async function loadStats(silent) {
     } catch (err) { console.error(err); }
 }
 
+// ========================
+// SECTION: INVENTORY LOGIC
+// ========================
+
 async function loadInventory(silent) {
     try {
         const res = await fetch('/api/products');
@@ -236,32 +243,28 @@ async function loadInventory(silent) {
         tbody.innerHTML = ''; 
 
         if (result.data && result.data.length > 0) {
-            result.data.forEach(p => {
-                let img = 'https://placehold.co/100?text=No+Img';
-                
-                if (p.images && p.images.length > 0) {
-                    img = p.images[0];
-                } else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') {
-                    img = p.imageUrl;
-                }
+            inventoryData = result.data; // Store for editing
 
-                if (!img.startsWith('http') && !img.startsWith('/')) {
-                    img = '/' + img;
-                }
+            result.data.forEach(p => {
+                const img = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || 'https://placehold.co/100?text=No+Img');
+                if (!img.startsWith('http') && !img.startsWith('/')) img = '/' + img;
+
                 const stockDisplay = p.stockCount < 5 
                     ? `<span style="color:var(--danger); font-weight:bold;">${p.stockCount} (Low)</span>` 
                     : p.stockCount;
 
                 const tr = document.createElement('tr');
+                tr.className = 'clickable-row';
+                // Make row clickable
+                tr.onclick = () => openEditProductModal(p._id);
+
                 tr.innerHTML = `
                     <td><img src="${img}" width="40" height="40" style="object-fit:cover; border-radius:8px;"></td>
-                    <td>${p.itemName}</td>
+                    <td style="font-weight:600; color:var(--primary);">${p.itemName}</td>
                     <td><span class="badge" style="background:#f1f5f9;">${p.category}</span></td>
                     <td>$${p.price}</td>
                     <td>${stockDisplay}</td>
-                    <td>
-                        <button class="btn-danger" onclick="deleteProduct('${p._id}')" style="padding:4px 10px;">Del</button>
-                    </td>
+                    <td style="color:#94a3b8; font-size:0.8rem;">Click to Edit</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -271,6 +274,123 @@ async function loadInventory(silent) {
         }
     } catch (err) { console.error("Inventory Error:", err); }
 }
+
+// --- PRODUCT MODAL ACTIONS ---
+
+// Open Modal for CREATE
+document.getElementById('add-product-btn').onclick = () => {
+    document.getElementById('product-modal').style.display = 'block';
+    document.getElementById('add-product-form').reset();
+    document.getElementById('product-modal-title').innerText = "Add Product";
+    document.getElementById('edit-product-id').value = ""; // Clear ID
+    document.getElementById('btn-delete-product').style.display = 'none'; // Hide Delete
+    
+    document.getElementById('specs-container').innerHTML = '';
+    addSpecField(); // Add one empty row
+    document.querySelector('input[name="sku"]').value = 'PROD-' + Math.floor(1000 + Math.random() * 9000);
+};
+
+// Open Modal for EDIT
+window.openEditProductModal = (id) => {
+    const product = inventoryData.find(p => p._id === id);
+    if(!product) return;
+
+    document.getElementById('product-modal').style.display = 'block';
+    document.getElementById('product-modal-title').innerText = "Edit Product";
+    document.getElementById('edit-product-id').value = product._id;
+    document.getElementById('btn-delete-product').style.display = 'block'; // Show Delete
+    
+    // Fill Fields
+    document.getElementById('p-name').value = product.itemName;
+    document.getElementById('p-sku').value = product.sku;
+    document.getElementById('p-price').value = product.price;
+    document.getElementById('p-stock').value = product.stockCount;
+    document.getElementById('p-desc').value = product.description;
+    document.getElementById('p-category').value = product.category;
+
+    // Fill Specs
+    const container = document.getElementById('specs-container');
+    container.innerHTML = '';
+    if(product.specs) {
+        Object.entries(product.specs).forEach(([key, val]) => {
+            addSpecField(key, val);
+        });
+    }
+    // Always add one empty row at bottom for convenience
+    if(container.children.length === 0) addSpecField();
+};
+
+// Helper to add spec row
+function addSpecField(key = '', val = '') {
+    const container = document.getElementById('specs-container');
+    const div = document.createElement('div');
+    div.className = 'spec-row';
+    div.style.display = 'grid';
+    div.style.gridTemplateColumns = '1fr 1fr 30px';
+    div.style.gap = '10px';
+    div.innerHTML = `
+        <input type="text" placeholder="Spec Name" class="form-control spec-key" value="${key}">
+        <input type="text" placeholder="Value" class="form-control spec-val" value="${val}">
+        <button type="button" class="remove-spec" style="background:var(--danger); color:white; border:none; border-radius:4px; cursor:pointer;">&times;</button>
+    `;
+    div.querySelector('.remove-spec').addEventListener('click', function() { this.parentElement.remove(); });
+    container.appendChild(div);
+}
+document.getElementById('add-spec-btn').addEventListener('click', () => addSpecField());
+
+// Handle Form Submit (Create OR Update)
+document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentToken = localStorage.getItem('vault_token');
+    
+    const id = document.getElementById('edit-product-id').value;
+    const isEdit = !!id; // True if ID exists
+
+    const formData = new FormData(e.target);
+    
+    // Process Specs
+    const specsObj = {};
+    document.querySelectorAll('.spec-row').forEach(row => {
+        const key = row.querySelector('.spec-key').value.trim();
+        const val = row.querySelector('.spec-val').value.trim();
+        if (key && val) specsObj[key] = val;
+    });
+    formData.append('specs', JSON.stringify(specsObj));
+
+    try {
+        const url = isEdit ? `/api/products/${id}` : '/api/products';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, { 
+            method: method, 
+            headers: { 'Authorization': `Bearer ${currentToken}` },
+            body: formData
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            alert(isEdit ? 'Product Updated' : 'Product Added');
+            document.getElementById('product-modal').style.display = 'none';
+            // Socket will handle refresh, but performFullSync is safe
+            loadInventory(); 
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (err) { console.error(err); alert('Operation Failed'); }
+});
+
+// Delete Button inside Modal
+document.getElementById('btn-delete-product').onclick = async () => {
+    const id = document.getElementById('edit-product-id').value;
+    if(confirm('Delete this product permanently?')) {
+        await fetch(`/api/products/${id}`, { 
+            method: 'DELETE', 
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        document.getElementById('product-modal').style.display = 'none';
+    }
+};
+
 
 async function loadOrders(silent) {
     try {
@@ -317,6 +437,10 @@ async function loadOrders(silent) {
     } catch (err) { console.error(err); }
 }
 
+// ========================
+// SECTION: USERS LOGIC
+// ========================
+
 async function loadUsers(silent) {
     try {
         const res = await fetch('/api/users', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -325,20 +449,19 @@ async function loadUsers(silent) {
         tbody.innerHTML = '';
 
         if (result.data && result.data.length > 0) {
+            usersData = result.data; // Store for editing
+
             result.data.forEach(u => {
                 const tr = document.createElement('tr');
+                tr.className = 'clickable-row';
+                tr.onclick = () => openUserDetails(u._id);
+
                 tr.innerHTML = `
-                    <td>${u.fullName}</td>
+                    <td style="font-weight:600; color:var(--primary);">${u.fullName}</td>
                     <td>${u.emailAddress}</td>
                     <td><span class="badge" style="background: ${u.privilegeLevel==='admin'?'var(--primary)':'#cbd5e1'}; color: ${u.privilegeLevel==='admin'?'white':'black'}">${u.privilegeLevel}</span></td>
                     <td>${new Date(u.registrationDate).toLocaleDateString()}</td>
-                    <td>
-                        ${u.privilegeLevel === 'admin' 
-                            ? `<button class="btn-secondary" onclick="changeRole('${u._id}', 'customer')">Demote</button>` 
-                            : `<button class="btn-primary" style="padding:5px;" onclick="changeRole('${u._id}', 'admin')">Promote</button>`}
-                        <button class="btn-secondary" onclick="openPassModal('${u._id}', '${u.emailAddress}')">Reset</button>
-                        <button class="btn-danger" onclick="deleteUser('${u._id}')">Del</button>
-                    </td>
+                    <td style="color:#94a3b8; font-size:0.8rem;">Manage</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -347,6 +470,67 @@ async function loadUsers(silent) {
     } catch (err) { console.error(err); }
 }
 
+// Open User Details Modal
+window.openUserDetails = (id) => {
+    const user = usersData.find(u => u._id === id);
+    if(!user) return;
+
+    document.getElementById('manage-user-id').value = user._id;
+    document.getElementById('u-detail-name').innerText = user.fullName;
+    document.getElementById('u-detail-email').innerText = user.emailAddress;
+    document.getElementById('u-detail-role').innerText = user.privilegeLevel.toUpperCase();
+    document.getElementById('u-detail-date').innerText = new Date(user.registrationDate).toLocaleDateString();
+    
+    // Set Dropdown to current role
+    document.getElementById('u-role-select').value = user.privilegeLevel;
+
+    document.getElementById('user-details-modal').style.display = 'block';
+};
+
+// Update Role Logic
+window.saveUserRole = async () => {
+    const id = document.getElementById('manage-user-id').value;
+    const role = document.getElementById('u-role-select').value;
+    
+    if(confirm(`Change role to ${role}?`)) {
+        const res = await fetch(`/api/users/${id}/role`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ role })
+        });
+        if(res.ok) {
+            alert('Role Updated');
+            document.getElementById('user-details-modal').style.display = 'none';
+        } else {
+            alert('Failed to update role');
+        }
+    }
+};
+
+// Trigger Password Reset
+window.triggerPasswordReset = () => {
+    const id = document.getElementById('manage-user-id').value;
+    const email = document.getElementById('u-detail-email').innerText;
+    
+    // Close Details, Open Reset
+    document.getElementById('user-details-modal').style.display = 'none';
+    
+    document.getElementById('reset-user-id').value = id;
+    // We don't have an element to show email in reset modal in previous code, but logical flow:
+    document.getElementById('password-modal').style.display = 'block';
+};
+
+// Trigger Delete
+window.triggerUserDelete = async () => {
+    const id = document.getElementById('manage-user-id').value;
+    if(confirm('Delete user PERMANENTLY?')) {
+        await fetch(`/api/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        document.getElementById('user-details-modal').style.display = 'none';
+    }
+};
+
+// Open Create User Modal (The button "Create User" calls this)
+window.openUserModal = () => document.getElementById('user-create-modal').style.display = 'block';
 // --- STANDARD ACTIONS ---
 
 // New function to handle manual order status submission

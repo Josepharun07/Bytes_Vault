@@ -249,30 +249,35 @@
 
     </main>
 
-    <!-- MODALS (Hidden) -->
-    <!-- Product Modal -->
+    <!-- MODALS -->
+    
+    <!-- PRODUCT MODAL (Create & Edit) -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('product-modal')">&times;</span>
-            <h2 style="margin-bottom: 1.5rem;">Add Product</h2>
+            <h2 id="product-modal-title" style="margin-bottom: 1.5rem;">Add Product</h2>
+            
             <form id="add-product-form" enctype="multipart/form-data">
+                <!-- Hidden ID to track if we are editing -->
+                <input type="hidden" id="edit-product-id" name="id">
+
                 <div class="form-group">
-                    <label>Product Images (Select multiple)</label>
-                    <input type="file" name="image" class="form-control" accept="image/*" multiple required>
-                    <p style="font-size:0.8rem; color:#64748b; margin-top:5px;">Hold Ctrl (Cmd) to select multiple files.</p>
+                    <label>Product Images</label>
+                    <input type="file" name="image" class="form-control" accept="image/*" multiple>
+                    <p style="font-size:0.8rem; color:#64748b; margin-top:5px;">Leave empty to keep existing images.</p>
                 </div>
                 <div class="form-group">
                     <label>Product Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="e.g. RTX 4090" required>
+                    <input type="text" name="name" id="p-name" class="form-control" required>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label>SKU</label>
-                        <input type="text" name="sku" class="form-control" placeholder="Generated Automatically" required>
+                        <input type="text" name="sku" id="p-sku" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label>Category</label>
-                        <select name="category" class="form-control">
+                        <select name="category" id="p-category" class="form-control">
                             <option value="GPU">GPU</option>
                             <option value="CPU">CPU</option>
                             <option value="Motherboard">Motherboard</option>
@@ -288,36 +293,84 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label>Price ($)</label>
-                        <input type="number" name="price" class="form-control" step="0.01" required>
+                        <input type="number" name="price" id="p-price" class="form-control" step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label>Stock</label>
-                        <input type="number" name="stock" class="form-control" required>
+                        <input type="number" name="stock" id="p-stock" class="form-control" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea name="description" class="form-control" rows="3" required></textarea>
+                    <textarea name="description" id="p-desc" class="form-control" rows="3" required></textarea>
                 </div>
-                <!-- FIX: Removed duplicate image input here -->
                 
                 <div class="form-group fullwidth">
                     <label>Technical Specifications</label>
-                    <div id="specs-container" style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;">
-                        <!-- JS will add inputs here -->
-                    </div>
+                    <div id="specs-container" style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;"></div>
                     <button type="button" id="add-spec-btn" class="btn-secondary" style="width: auto; font-size: 0.8rem;">+ Add Spec Row</button>
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Save Product</button>
+
+                <div class="action-bar" style="justify-content: space-between;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Save Product</button>
+                    <!-- Delete button only shows when editing -->
+                    <button type="button" id="btn-delete-product" class="btn-danger" style="display:none;">Delete Product</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- User Modal -->
-    <div id="user-modal" class="modal">
+    <!-- USER DETAILS MODAL (Manage Existing User) -->
+    <div id="user-details-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-modal" onclick="closeModal('user-details-modal')">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">User Management</h2>
+            
+            <!-- Hidden ID -->
+            <input type="hidden" id="manage-user-id">
+
+            <div class="user-detail-grid">
+                <div class="detail-group">
+                    <label>Full Name</label>
+                    <div id="u-detail-name">...</div>
+                </div>
+                <div class="detail-group">
+                    <label>Role</label>
+                    <div id="u-detail-role">...</div>
+                </div>
+                <div class="detail-group">
+                    <label>Email</label>
+                    <div id="u-detail-email">...</div>
+                </div>
+                <div class="detail-group">
+                    <label>Joined</label>
+                    <div id="u-detail-date">...</div>
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <label style="font-weight:600; margin-bottom:0.5rem; display:block;">Change Role</label>
+                <div style="display:flex; gap:10px;">
+                    <select id="u-role-select" class="form-control">
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button onclick="saveUserRole()" class="btn-primary">Update</button>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button onclick="triggerPasswordReset()" class="btn-secondary" style="flex: 1;">Reset Password</button>
+                <button onclick="triggerUserDelete()" class="btn-danger">Delete User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW USER CREATE MODAL (Separate from management) -->
+    <div id="user-create-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
-            <span class="close-modal" onclick="closeModal('user-modal')">&times;</span>
-            <h2 style="margin-bottom: 1.5rem;">Create User</h2>
+            <span class="close-modal" onclick="closeModal('user-create-modal')">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Create New User</h2>
             <form id="create-user-form">
                 <div class="form-group"><label>Full Name</label><input type="text" id="new-name" class="form-control" required></div>
                 <div class="form-group"><label>Email</label><input type="email" id="new-email" class="form-control" required></div>
@@ -333,18 +386,18 @@
         </div>
     </div>
 
-    <!-- Password Modal -->
-    <div id="password-modal" class="modal">
+    <!-- PASSWORD RESET MODAL (Sub-modal) -->
+    <div id="password-modal" class="modal" style="z-index: 2100;">
         <div class="modal-content" style="max-width: 400px;">
             <span class="close-modal" onclick="closeModal('password-modal')">&times;</span>
             <h2>Reset Password</h2>
             <form id="reset-pass-form">
                 <input type="hidden" id="reset-user-id">
-                <p style="margin-bottom: 1rem; color: #64748b;">For user: <b id="reset-user-email"></b></p>
+                <p style="margin-bottom: 1rem; color: #64748b;">Enter new password:</p>
                 <div class="form-group">
-                    <input type="password" id="reset-new-pass" class="form-control" placeholder="Enter New Password" required>
+                    <input type="password" id="reset-new-pass" class="form-control" placeholder="New Password" required>
                 </div>
-                <button type="submit" class="btn-danger" style="width: 100%;">Update Password</button>
+                <button type="submit" class="btn-danger" style="width: 100%;">Save Password</button>
             </form>
         </div>
     </div>
