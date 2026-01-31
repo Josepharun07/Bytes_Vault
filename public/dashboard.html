@@ -30,6 +30,9 @@
             <a onclick="switchView('system')" class="nav-link" id="nav-system">
                 📡 System
             </a>
+            <a onclick="switchView('pos-admin')" class="nav-link" id="nav-pos-admin">
+                🏪 POS Manager
+            </a>
         </div>
 
         <div class="nav-menu">
@@ -158,6 +161,44 @@
                 </table>
             </div>
         </section>
+
+
+        <section id="view-pos-admin" class="view-section">
+             <div class="dashboard-header">
+                 <h2>POS Management</h2>
+                 <p class="muted">Monitor in-store sales and staff performance.</p>
+             </div>
+
+             <div class="stats-grid" style="margin-bottom:2rem;">
+                    <div class="stat-card">
+                        <div><h3 id="pos-total-sales">$0.00</h3><p>Total POS Revenue</p></div>
+                        <div class="stat-icon">💵</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><h3 id="pos-count">0</h3><p>Transactions</p></div>
+                        <div class="stat-icon">🧾</div>
+                    </div>
+            </div>
+
+            <div class="card">
+                <h3>Recent POS Transactions</h3>
+                <div class="table-responsive">
+                   <table id="pos-orders-table">
+                        <thead>
+                          <tr>
+                             <th>Order ID</th>
+                             <th>Date</th>
+                             <th>Customer</th> 
+                             <th>Staff</th>    
+                             <th>Total</th>
+                             <th>Status</th>
+                         </tr>
+                        </thead>
+                        <tbody id="pos-orders-body"></tbody>
+                    </table>
+                </div>
+            </div>
+       </section>
 
         <!-- 5. ENHANCED SYSTEM STATUS VIEW -->
         <section id="view-system" class="view-section">
@@ -388,6 +429,7 @@
                     <select id="new-role" class="form-control">
                         <option value="customer">Customer</option>
                         <option value="admin">Admin</option>
+                        <option value="staff">Staff (POS)</option>
                     </select>
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%;">Create User</button>

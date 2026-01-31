@@ -9,10 +9,10 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-    accessKey: { type: String, required: true, select: false }, // Password
+    accessKey: { type: String, required: true, select: false },
     privilegeLevel: { 
         type: String, 
-        enum: ['customer', 'admin'], 
+        enum: ['customer', 'admin', 'staff'], 
         default: 'customer' 
     },
     registrationDate: { type: Date, default: Date.now }

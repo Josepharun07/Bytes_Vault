@@ -106,6 +106,7 @@ async function performFullSync(silent = false) {
         // Reload all data sections
         await Promise.all([
             loadStats(silent),
+            loadPosAdmin(silent),
             loadInventory(silent),
             loadOrders(silent),
             loadUsers(silent),
@@ -856,3 +857,59 @@ window.exportCSV = async (type) => {
         alert('Export Failed');
     }
 };
+
+// Inside public/js/admin.js
+
+async function loadPosAdmin(silent) {
+    try {
+        const res = await fetch('/api/orders/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
+        const result = await res.json();
+        
+        if (result.success && result.data) {
+            // Filter only POS orders
+            const posOrders = result.data.filter(o => o.source === 'POS');
+            
+            const total = posOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+            
+            const totalEl = document.getElementById('pos-total-sales');
+            const countEl = document.getElementById('pos-count');
+            if(totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+            if(countEl) countEl.innerText = posOrders.length;
+
+            const tbody = document.getElementById('pos-orders-body');
+            if(tbody) {
+                tbody.innerHTML = '';
+                if(posOrders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No POS transactions yet.</td></tr>';
+                } else {
+                    posOrders.forEach(o => {
+                        const tr = document.createElement('tr');
+                        
+                        // STAFF: stored in o.user (populated from 'User' model)
+                        const staffName = o.user ? o.user.fullName : 'Unknown Staff';
+                        
+                        // BUYER: stored in o.buyerDetails (manual input)
+                        const buyerName = (o.buyerDetails && o.buyerDetails.name) 
+                                          ? o.buyerDetails.name 
+                                          : 'Walk-in';
+
+                        tr.innerHTML = `
+                            <td class="mono">#${o._id.slice(-4)}</td>
+                            <td>${new Date(o.createdAt).toLocaleString()}</td>
+                            
+                            <!-- NEW COLUMNS -->
+                            <td style="color:var(--primary); font-weight:600;">${buyerName}</td>
+                            <td style="color:#64748b;">${staffName}</td>
+                            
+                            <td>$${o.totalAmount.toFixed(2)}</td>
+                            <td><span class="badge" style="background:var(--success); color:white;">Completed</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        console.error("POS Admin Load Error:", err);
+    }
+}

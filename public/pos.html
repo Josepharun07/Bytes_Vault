@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Terminal | Bytes Vault</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* POS Specific Layout */
+        .pos-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            height: calc(100vh - 70px); /* Full height minus navbar */
+            overflow: hidden;
+        }
+        .pos-catalog {
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #f1f5f9;
+        }
+        .pos-sidebar {
+            background: white;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+        }
+        .pos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        .small-card {
+            border: 1px solid #e2e8f0;
+            transition: transform 0.1s;
+        }
+        .small-card:active {
+            transform: scale(0.98);
+        }
+        .cart-items-wrapper {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin: 1rem 0;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .pos-summary {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Minimal Navbar -->
+    <nav class="navbar">
+        <a href="#" class="nav-brand">Bytes Vault <span style="font-weight:400; font-size:0.9rem;">| POS Terminal</span></a>
+        <div class="nav-menu">
+            <button id="logout-btn" class="nav-btn danger">Logout Staff</button>
+        </div>
+    </nav>
+
+    <div class="pos-layout">
+        <!-- LEFT: Product Grid -->
+        <div class="pos-catalog">
+            <h3 style="margin-bottom:1rem;">Available Products</h3>
+            <div id="pos-grid" class="pos-grid">
+                <!-- JS Injects Here -->
+                <p>Loading...</p>
+            </div>
+        </div>
+
+        <!-- RIGHT: Cart & Checkout -->
+        <div class="pos-sidebar">
+            <h3>Current Order</h3>
+            
+            <div class="cart-items-wrapper">
+                <table style="width:100%; font-size:0.9rem;">
+                    <thead>
+                        <tr style="text-align:left; color:#64748b;">
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="pos-cart-body">
+                        <!-- Items go here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pos-summary">
+                <div class="summary-row"><span>Subtotal</span> <strong id="pos-subtotal">$0.00</strong></div>
+                <div class="summary-row"><span>Tax (10%)</span> <strong id="pos-tax">$0.00</strong></div>
+                <div class="summary-divider"></div>
+                <div class="summary-row" style="font-size:1.2rem;"><span>Total</span> <strong id="pos-total">$0.00</strong></div>
+                
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 5px; display: block;">Customer Details</label>
+                    <input type="text" id="pos-cust-name" class="form-control" placeholder="Customer Name" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+                    <input type="email" id="pos-cust-email" class="form-control" placeholder="Customer Email (Optional)" style="font-size: 0.9rem;">
+                </div> 
+
+
+                <button id="btn-checkout" class="btn-primary" style="width:100%; margin-top:1rem; padding:1rem;" disabled>
+                    Complete Sale
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/pos.js"></script>
+</body>
+</html>

@@ -70,11 +70,19 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("vault_role", data.role);
 
       // Redirect based on role
+      if (res.ok && data.success) {
+      localStorage.setItem("vault_token", data.token);
+      localStorage.setItem("vault_role", data.role);
+
+      // Redirect based on role
       if (data.role === "admin") {
         window.location.href = "/dashboard.html";
+      } else if (data.role === "staff") {
+        window.location.href = "/pos.html"; // NEW: Redirect to POS
       } else {
         window.location.href = "/shop.html";
       }
+    } /// have this checked !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     } else {
       showErrors([data.message || "Login failed"]);
       submitBtn.textContent = "Login";

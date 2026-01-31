@@ -11,28 +11,22 @@ const notifyClients = (req, type, message) => {
     }
 };
 
-// @desc    Create new order
+// Replace the existing createOrder function in controllers/orderController.js
+
 exports.createOrder = async (req, res) => {
     try {
-        const { cartItems, shippingAddress } = req.body;
+        // Extract buyerDetails from request
+        const { cartItems, shippingAddress, source, buyerDetails } = req.body; 
+        
         let totalAmount = 0;
         let orderItems = [];
 
+        // 1. Stock Validation (Same as before)
         for (const item of cartItems) {
             const product = await Product.findById(item._id);
-            
-            // Validate Product
-            if (!product) {
-                return res.status(404).json({ success: false, message: `Product not found` });
-            }
-            
-            // Validate Stock
-            if (product.stockCount < item.qty) {
-                // --- FIX 1: Match the test expectation string ---
-                return res.status(400).json({ success: false, message: `Insufficient stock for: ${item.itemName}` });
-            }
+            if (!product) return res.status(404).json({ success: false, message: `Product not found` });
+            if (product.stockCount < item.qty) return res.status(400).json({ success: false, message: `Insufficient stock` });
 
-            // Deduct
             product.stockCount -= item.qty;
             await product.save();
             
@@ -45,16 +39,33 @@ exports.createOrder = async (req, res) => {
             });
         }
 
+        // 2. Determine Order Status
+        const orderStatus = (source === 'POS') ? 'Completed' : 'Pending';
+        
+        // 3. Create Order
         const order = await Order.create({
-            user: req.user.id,
+            user: req.user.id, // This links the logged-in user (Staff for POS, Customer for Online)
             items: orderItems,
             shippingAddress,
-            totalAmount: totalAmount * 1.1 // +10% Tax
+            totalAmount: totalAmount * 1.1,
+            source: source || 'Online',
+            status: orderStatus,
+            // Save the specific buyer info
+            buyerDetails: buyerDetails || { 
+                name: shippingAddress?.fullName || 'Online Customer', 
+                email: '' 
+            }
         });
 
-        notifyClients(req, 'ORDER_NEW', 'New Order Placed');
+        // Notify Admin
+        const io = req.app.get('io');
+        if(io) io.emit('data:updated', { type: 'ORDER_NEW', message: `New ${source} Order` });
 
-        res.status(201).json({ success: true, order });
+        // Send back the order object + the Staff Name (from req.user) for confirmation
+        const responseOrder = order.toObject();
+        responseOrder.staffName = req.user.fullName; 
+
+        res.status(201).json({ success: true, order: responseOrder });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
