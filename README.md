@@ -173,11 +173,11 @@ npm test
 
 ## 👥 Contributors
 
-*   **Arun Joseph** - Lead Architect & Backend Engineering
-*   **Farhan Al Rashid** - UI/UX Design & Frontend Workflow
-*   **Navya Aila** - Requirements Analysis & User Personas
-*   **Abhishek Ghimire** - Quality Assurance & Security Standards
-*   **Jayadhwaj Reddy Mothey** - System Modelling & Feature Integration
+*   **Arun Joseph** 
+*   **Farhan Al Rashid** 
+*   **Navya Aila** 
+*   **Abhishek Ghimire** 
+*   **Jayadhwaj Reddy Mothey** 
 
 ---
 Bytes Vault Team. Built for SIT725 Applied Software Engineering.*
