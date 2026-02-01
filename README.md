@@ -1,163 +1,184 @@
 
-***
+# 🛡️ Bytes Vault
+### Enterprise-Grade E-Commerce & Inventory Management System
 
-# 🔐 Bytes Vault - Architecture & Developer Guide
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
 
-> **⚠️ CORE ARCHITECTURE WARNING:**
-> This project follows a strict **MVC (Model-View-Controller)** pattern with a **Vanilla JS Frontend**.
-> *   **DO NOT** write inline JavaScript in HTML files (`<script>...</script>`). Use `public/js/*.js`.
-> *   **DO NOT** modify existing Controller logic without consulting the lead.
-> *   **DO NOT** change Database Schema field names (e.g., do not change `itemName` to `name`).
+**Bytes Vault** is a high-performance, full-stack application designed to bridge the gap between online retail and physical inventory. Built using a strict **Vanilla Tech Stack** (No Frontend Frameworks), it demonstrates mastery of core software engineering principles including MVC Architecture, Atomic Transactions, Real-time WebSockets, and Containerization.
 
 ---
 
-## 🏗️ System Architecture
+## 📖 Table of Contents
+1. [Project Overview](#-project-overview)
+2. [Key Features](#-key-features)
+3. [Technology Stack](#-%EF%B8%8F-technology-stack)
+4. [System Architecture](#-system-architecture)
+5. [Getting Started (Local & Docker)](#-getting-started)
+6. [Testing Strategy](#-testing-strategy)
+7. [API Reference](#-api-reference)
+8. [Contributors](#-contributors)
 
-### The Tech Stack
-*   **Backend:** Node.js + Express.js
-*   **Database:** MongoDB Atlas (Mongoose ODM)
-*   **Frontend:** HTML5, CSS3, Vanilla JavaScript (No React/Vue/Angular)
-*   **Auth:** JWT (JSON Web Tokens) + Bcrypt Encryption
-*   **Security:** Role-Based Access Control (RBAC)
+---
 
-### Directory Structure (The "Map")
-All new code must fit into this structure. **Do not create random files in the root.**
+## 🔭 Project Overview
+
+In the electronics retail sector, "phantom inventory"—selling items online that are out of stock physically—is a major pain point. Bytes Vault solves this by unifying the **Customer Storefront**, **Admin Dashboard**, and **In-Store POS (Point of Sale)** into a single, synchronized ecosystem.
+
+**Core Philosophy:**
+*   **Zero Frameworks:** Frontend logic is built with pure ES6 JavaScript to demonstrate deep DOM understanding.
+*   **Data Integrity:** Inventory is deducted atomically during checkout to prevent overselling.
+*   **Real-Time:** Admin dashboards update instantly via Socket.io when sales occur.
+
+---
+
+## 🚀 Key Features
+
+### 🛍️ Customer Experience
+*   **Dynamic Catalog:** Real-time search and filtering by category (GPU, CPU, etc.).
+*   **Smart Cart:** Persistent shopping cart using `localStorage` logic.
+*   **User Profiles:** Order history tracking with status updates (Pending -> Shipped).
+*   **Review System:** Verified buyers can rate and review products.
+
+### 🛡️ Admin Command Center (SPA)
+*   **Single Page Application:** A seamless, tab-based interface for managing the entire business.
+*   **Analytics Engine:** Interactive charts (Chart.js) showing Revenue trends, Category breakdown, and Active Users.
+*   **Dynamic Inventory:** Add products with **Flexible Specifications** (key-value pairs) without altering the database schema.
+*   **User Management:** Promote/Demote staff and reset user passwords.
+*   **Order Fulfillment:** Workflow to update order statuses.
+
+### 🏪 Point of Sale (POS)
+*   **Staff Interface:** Streamlined UI for in-store employees.
+*   **Walk-in Processing:** Bypasses shipping logic for instant "over-the-counter" transactions.
+*   **Unified Stock:** Shares the exact same database as the online store.
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technology | Usage |
+| :--- | :--- | :--- |
+| **Backend** | **Node.js + Express** | RESTful API & Business Logic |
+| **Database** | **MongoDB Atlas** | NoSQL Persistence & Aggregations |
+| **Frontend** | **HTML5 / CSS3** | Responsive UI with CSS Variables & Grid |
+| **Scripting** | **Vanilla JS (ES6)** | Client-side DOM manipulation & Fetch API |
+| **Real-Time** | **Socket.io** | Live dashboard updates |
+| **Security** | **JWT & Bcrypt** | Stateless Auth & Encryption |
+| **DevOps** | **Docker** | Containerization of App & DB |
+| **Testing** | **Mocha / Chai** | Integration & Unit Testing |
+
+---
+
+## 🏛 System Architecture
+
+The project adheres to a strict **Model-View-Controller (MVC)** pattern.
 
 ```text
 /Bytes_Vault
-├── config/
-│   └── db.js                # Database connection logic
-├── controllers/             # BUSINESS LOGIC (Only .js files here)
-│   ├── authController.js    # Register, Login, Token Gen
-│   ├── orderController.js   # Checkout, Stock Deduction, Admin Order Views
-│   ├── productController.js # Product CRUD, Search, Filter, Reviews
-│   └── userController.js    # User Management (Promote/Demote)
-├── middleware/              # SECURITY GATES
-│   ├── authMiddleware.js    # protect() and admin() functions
-│   └── uploadMiddleware.js  # Multer config for images
-├── models/                  # DATABASE SCHEMAS (Mongoose)
-│   ├── User.js              # One unified model for Admin/Customer
-│   ├── Product.js           # Inventory items + Reviews array
-│   └── Order.js             # Transaction records
-├── public/                  # FRONTEND (The View)
-│   ├── css/                 # Global styles
-│   ├── js/                  # Client-side Logic (Fetch API calls)
-│   ├── uploads/             # Product images storage
-│   └── *.html               # All UI Pages
-├── routes/                  # API ENDPOINTS
-│   ├── authRoutes.js        # Maps URL -> Controller
-│   ├── productRoutes.js
-│   ├── orderRoutes.js
-│   └── userRoutes.js
-└── server.js                # Entry Point (Do not touch unless adding global middleware)
+├── config/              # DB Connections
+├── controllers/         # Business Logic (Auth, Products, Orders)
+├── middleware/          # Security (RBAC, JWT) & File Uploads
+├── models/              # Mongoose Schemas
+├── public/              # THE VIEW (HTML/CSS/JS)
+│   ├── js/              # Client-side Logic (SPA engine, Cart logic)
+│   ├── css/             # Global Styling
+│   └── uploads/         # Product Images
+├── routes/              # API Endpoint Definitions
+├── test/                # Automated Test Suite
+├── docker-compose.yml   # Container Orchestration
+└── server.js            # Application Entry Point
 ```
 
 ---
 
-## 📜 Development Rules (Read Before Coding)
+## ⚙️ Getting Started
 
-### 1. Authentication Standard
-*   **Token Key:** We store the JWT in LocalStorage under the key **`'vault_token'`**. Do not use `'token'` or `'jwt'`.
-*   **Role Key:** We store the role in LocalStorage under **`'vault_role'`**.
-*   **Headers:** All protected API calls must include:
-    ```javascript
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('vault_token')}` }
+You can run Bytes Vault locally or via Docker.
+
+### Prerequisites
+*   Node.js v16+
+*   MongoDB (Local or Atlas Connection String)
+
+### Option A: Standard Local Setup
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/Josepharun07/Bytes_Vault.git
+    cd Bytes_Vault
     ```
-
-### 2. Database Naming Conventions
-When writing queries or frontend displays, strictly use these field names:
-
-*   **User Model:** `fullName`, `emailAddress`, `privilegeLevel` ('admin'/'customer').
-*   **Product Model:** `itemName`, `sku`, `price`, `stockCount`, `category`, `imageUrl`, `specs` (Map).
-*   **Order Model:** `totalAmount`, `shippingAddress`, `status` ('Pending'/'Shipped').
-
-### 3. Adding New Features
-*   **Step 1:** Create a Route in `/routes`.
-*   **Step 2:** Create a Controller function in `/controllers`.
-*   **Step 3:** Add the UI in `/public`.
-*   **Step 4:** Write the Fetch logic in `/public/js`.
-*   **NEVER** write database logic inside `server.js` or inside HTML files.
-
----
-
-## 🛣️ API Documentation (The Contract)
-
-### 🔐 Authentication (`/api/auth`)
-| Method | Endpoint | Access | Body Params | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/register` | Public | `fullName`, `email`, `password`, `role` | Creates user. Hashed password. |
-| `POST` | `/login` | Public | `email`, `password` | Returns `{ token, role }`. |
-
-### 📦 Products (`/api/products`)
-| Method | Endpoint | Access | Params | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | Public | `?search=xyz&category=GPU` | Returns filtered list. |
-| `POST` | `/` | **Admin** | `FormData` (File + Fields) | Creates product with image. |
-| `PUT` | `/:id` | **Admin** | `FormData` | Updates product. |
-| `DELETE` | `/:id` | **Admin** | - | Removes product. |
-| `POST` | `/:id/reviews` | Login | `rating` (1-5), `comment` | Adds user review. |
-
-### 🛒 Orders (`/api/orders`)
-| Method | Endpoint | Access | Params | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/` | Login | `cartItems` [], `shippingAddress` | Atomic Transaction. Deducts Stock. |
-| `GET` | `/myorders` | Login | - | Returns logged-in user's history. |
-| `GET` | `/admin/all` | **Admin** | - | Returns every order in system. |
-| `GET` | `/admin/stats` | **Admin** | - | Returns Revenue, User Count, Low Stock. |
-| `PUT` | `/admin/:id` | **Admin** | `status` | Updates order status (e.g., 'Shipped'). |
-
-### 👥 Users (`/api/users`)
-| Method | Endpoint | Access | Params | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | **Admin** | - | List all users. |
-| `POST` | `/` | **Admin** | `fullName`, `email`, `password`, `role` | Manual user creation. |
-| `PUT` | `/:id/role` | **Admin** | `role` ('admin'/'customer') | Promote or Demote user. |
-| `PUT` | `/:id/password`| **Admin** | `newPassword` | Force reset user password. |
-| `DELETE` | `/:id` | **Admin** | - | Delete user account. |
-
----
-
-## 📘 File Functionality Guide
-
-### Controllers
-*   **`authController.js`**: Handles encryption (`bcrypt`) and Token signing (`jwt`). Contains logic to check for duplicate emails.
-*   **`orderController.js`**: Contains the **Critical Business Logic**.
-    *   *Atomic Transactions:* Ensures stock is deducted only if the order saves successfully.
-    *   *Aggregations:* Calculates Total Revenue for the dashboard.
-*   **`productController.js`**: Handles file system operations (deleting old images when a product is deleted) and dynamic specification parsing.
-
-### Middleware
-*   **`authMiddleware.js`**:
-    *   `protect`: Decodes JWT, finds user, attaches to `req.user`.
-    *   `admin`: Checks if `req.user.privilegeLevel === 'admin'`.
-*   **`uploadMiddleware.js`**: Configures `Multer` to save files to `public/uploads/products` with unique timestamps.
-*   **`loginRateLimiter.js`**: Prevents abuse by limiting the number of login attempts per user or IP within a defined time window, helping protect against brute-force attacks and service overload.
-
-
-### Frontend Scripts
-*   **`admin.js`**: The SPA (Single Page Application) engine for the Dashboard. Handles Tab switching and Data loading.
-*   **`shop.js`**: Handles Product rendering, Search debounce, and Category filtering.
-*   **`cart.js`**: Manages `localStorage` array, calculates totals, and updates Navbar badge.
-*   **`checkout.js`**: Orchestrates the payment flow and API submission.
-
----
-
-## ⚙️ Setup & Run
-
-1.  **Install Dependencies:**
+2.  **Install Dependencies**
     ```bash
     npm install
     ```
-2.  **Environment Variables:**
-    Ensure `.env` exists with `MONGO_URI` and `JWT_SECRET`.
-3.  **Run Server:**
+3.  **Configure Environment**
+    Create a `.env` file in the root:
+    ```env
+    PORT=3000
+    NODE_ENV=development
+    MONGO_URI=your_mongodb_connection_string
+    JWT_SECRET=your_secret_key
+    ```
+4.  **Seed the Database** (Loads default Admin/Users)
+    ```bash
+    npm run seed
+    ```
+5.  **Run the Server**
     ```bash
     npm run dev
     ```
-4.  **Run Tests:**
+    *Access the app at `http://localhost:3000`*
+
+### Option B: Docker Setup (Recommended)
+1.  **Build and Run**
     ```bash
-    npm test
+    docker-compose up --build
     ```
+2.  **Seed Database (Inside Container)**
+    Open a new terminal and run:
+    ```bash
+    docker exec -it bytes-vault-app npm run seed
+    ```
+    *Access the app at `http://localhost:3000`*
 
 ---
-*Maintained by the Bytes Vault Team For SIT725.*
+
+## 🧪 Testing Strategy
+
+The project includes a robust test suite covering Unit, Integration, and End-to-End scenarios.
+
+**Run All Tests:**
+```bash
+npm test
+```
+
+**Key Test Suites:**
+*   `full_system.test.js`: Simulates a full customer journey (Register -> Login -> Buy -> Admin Check).
+*   `auth.test.js`: Verifies security boundaries and token generation.
+*   `product.test.js`: Verifies CRUD operations and file upload logic.
+
+---
+
+## 🛣 API Reference (Snapshot)
+
+| Method | Endpoint | Role | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Public | Authenticate & Retrieve Token |
+| `GET` | `/api/products` | Public | Fetch Catalog with Search/Filter |
+| `POST` | `/api/orders` | Customer | Place Online Order (Atomic Transaction) |
+| `GET` | `/api/orders/admin/stats` | Admin | Fetch Revenue & Real-time Metrics |
+| `POST` | `/api/users` | Admin | Create Staff/Admin Accounts |
+
+---
+
+## 👥 Contributors
+
+*   **Arun Joseph** - Lead Architect & Backend Engineering
+*   **Farhan Al Rashid** - UI/UX Design & Frontend Workflow
+*   **Navya Aila** - Requirements Analysis & User Personas
+*   **Abhishek Ghimire** - Quality Assurance & Security Standards
+*   **Jayadhwaj Reddy Mothey** - System Modelling & Feature Integration
+
+---
+Bytes Vault Team. Built for SIT725 Applied Software Engineering.*
+```
