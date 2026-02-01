@@ -8,7 +8,6 @@ const notifyClients = (req, type, message) => {
     if(io) io.emit('data:updated', { type, message, timestamp: new Date() });
 };
 
-// Helper to sanitize filenames
 const slugify = (text) => {
     return text.toString().toLowerCase()
         .replace(/\s+/g, '-')
@@ -18,6 +17,21 @@ const slugify = (text) => {
         .replace(/-+$/, '');
 };
 
+// Helper: Normalize Category (Title Case)
+const formatCategory = (cat) => {
+    return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
+};
+
+// @desc    Get All Unique Categories
+exports.getCategories = async (req, res) => {
+    try {
+        const categories = await Product.distinct('category');
+        res.status(200).json({ success: true, data: categories.sort() });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 // @desc    Add new product
 exports.createCatalogItem = async (req, res) => {
     let createdProduct = null;
@@ -25,38 +39,8 @@ exports.createCatalogItem = async (req, res) => {
         const { name, sku, price, stock, category, description, specs } = req.body;
         
         // Input validation
-        if (!name || !sku || price === undefined || stock === undefined || !category || !description) {
-            return res.status(400).json({ success: false, message: 'All required fields must be provided' });
-        }
-        
-        if (name.trim().length < 2) {
-            return res.status(400).json({ success: false, message: 'Product name must be at least 2 characters' });
-        }
-        
-        if (sku.trim().length < 2) {
-            return res.status(400).json({ success: false, message: 'SKU must be at least 2 characters' });
-        }
-        
-        // Numeric validation
-        const priceNum = Number(price);
-        const stockNum = Number(stock);
-        
-        if (isNaN(priceNum) || priceNum < 0) {
-            return res.status(400).json({ success: false, message: 'Price must be a positive number' });
-        }
-        
-        if (isNaN(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) {
-            return res.status(400).json({ success: false, message: 'Stock must be a positive integer' });
-        }
-        
-        // Category validation
-        const validCategories = ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software'];
-        if (!validCategories.includes(category)) {
-            return res.status(400).json({ success: false, message: 'Invalid category' });
-        }
-        
-        if (description.trim().length < 10) {
-            return res.status(400).json({ success: false, message: 'Description must be at least 10 characters' });
+        if (!name || !sku || !category || !description) {
+            return res.status(400).json({ success: false, message: 'Required fields missing' });
         }
         
         let parsedSpecs = specs;
@@ -64,64 +48,72 @@ exports.createCatalogItem = async (req, res) => {
             try { parsedSpecs = JSON.parse(specs); } catch (e) { parsedSpecs = {}; }
         }
 
+        // Store Category in uniform format (e.g., "Laptop", not "laptop")
+        const formattedCategory = formatCategory(category);
+
         createdProduct = await Product.create({
             itemName: name.trim(),
             sku: sku.trim().toUpperCase(),
-            price: priceNum,
-            stockCount: stockNum,
-            category,
+            price: Number(price),
+            stockCount: Number(stock),
+            category: formattedCategory,
             description: description.trim(),
-            // FIX 1: Use a reliable online placeholder if no image
             images: ['https://placehold.co/600x400?text=No+Image'], 
             specs: parsedSpecs
         });
 
+        // Image Handling (Same as before)
         const imagePaths = [];
-
         if (req.files && req.files.length > 0) {
             const productId = createdProduct._id.toString();
             const productSlug = slugify(name);
             const targetDir = path.join(__dirname, '../public/uploads/products', productId);
             
-            if (!fs.existsSync(targetDir)){
-                fs.mkdirSync(targetDir, { recursive: true });
-            }
+            if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
             req.files.forEach((file, index) => {
                 const ext = path.extname(file.originalname);
                 const newFilename = `${productSlug}-${productId}-${index + 1}${ext}`;
                 const targetPath = path.join(targetDir, newFilename);
-                
                 fs.renameSync(file.path, targetPath);
-
-                // FIX 2: Force Forward Slashes (/) for URLs, even on Windows
-                // Also add leading slash for absolute path
-                let dbPath = `uploads/products/${productId}/${newFilename}`;
-                imagePaths.push(dbPath); 
+                // Force forward slashes
+                imagePaths.push(`uploads/products/${productId}/${newFilename}`); 
             });
 
             createdProduct.images = imagePaths;
             await createdProduct.save();
         }
 
-        notifyClients(req, 'PRODUCT_NEW', `New Product Added: ${name}`);
+        notifyClients(req, 'PRODUCT_NEW', `New Product: ${name}`);
         res.status(201).json({ success: true, product: createdProduct });
 
     } catch (err) {
         if(createdProduct) await Product.findByIdAndDelete(createdProduct._id);
-        if (req.files) req.files.forEach(f => { if (fs.existsSync(f.path)) fs.unlinkSync(f.path); });
-        
-        if (err.code === 11000) return res.status(400).json({ success: false, message: 'SKU already exists.' });
+        if (err.code === 11000) return res.status(400).json({ success: false, message: 'SKU exists.' });
         res.status(500).json({ success: false, message: err.message });
     }
 };
 
+// @desc    Get all products (Expanded Search)
 exports.fetchCatalog = async (req, res) => {
     try {
         const { category, search } = req.query;
         let query = {};
-        if (category && category !== 'All') query.category = category;
-        if (search && search.trim() !== '') query.itemName = { $regex: search, $options: 'i' };
+
+        // Filter by Category
+        if (category && category !== 'All') {
+            query.category = category;
+        }
+
+        // Search Logic: Name OR Description OR Category
+        if (search && search.trim() !== '') {
+            const searchRegex = { $regex: search, $options: 'i' };
+            query.$or = [
+                { itemName: searchRegex },
+                { description: searchRegex },
+                { category: searchRegex }
+            ];
+        }
 
         const products = await Product.find(query).sort({ createdAt: -1 });
         res.status(200).json({ success: true, count: products.length, data: products });
@@ -135,16 +127,15 @@ exports.removeItem = async (req, res) => {
         const item = await Product.findById(req.params.id);
         if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
-        const name = item.itemName;
         const productId = item._id.toString();
-
         const productFolder = path.join(__dirname, '../public/uploads/products', productId);
+        
         if (fs.existsSync(productFolder)) {
             fs.rmSync(productFolder, { recursive: true, force: true });
         }
 
         await item.deleteOne();
-        notifyClients(req, 'PRODUCT_DEL', `Product Deleted: ${name}`);
+        notifyClients(req, 'PRODUCT_DEL', `Deleted: ${item.itemName}`);
         res.status(200).json({ success: true, message: 'Item removed' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -155,50 +146,13 @@ exports.updateCatalogItem = async (req, res) => {
     try {
         const { name, price, stock, description, category } = req.body;
         const product = await Product.findById(req.params.id);
-        if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+        if (!product) return res.status(404).json({ success: false, message: 'Not found' });
 
-        // Validate name
-        if (name !== undefined) {
-            if (!name || name.trim().length < 2) {
-                return res.status(400).json({ success: false, message: 'Product name must be at least 2 characters' });
-            }
-            product.itemName = name.trim();
-        }
-        
-        // Validate price
-        if (price !== undefined) {
-            const priceNum = Number(price);
-            if (isNaN(priceNum) || priceNum < 0) {
-                return res.status(400).json({ success: false, message: 'Price must be a positive number' });
-            }
-            product.price = priceNum;
-        }
-        
-        // Validate stock
-        if (stock !== undefined) {
-            const stockNum = Number(stock);
-            if (isNaN(stockNum) || stockNum < 0 || !Number.isInteger(stockNum)) {
-                return res.status(400).json({ success: false, message: 'Stock must be a positive integer' });
-            }
-            product.stockCount = stockNum;
-        }
-        
-        // Validate description
-        if (description !== undefined) {
-            if (!description || description.trim().length < 10) {
-                return res.status(400).json({ success: false, message: 'Description must be at least 10 characters' });
-            }
-            product.description = description.trim();
-        }
-        
-        // Validate category
-        if (category !== undefined) {
-            const validCategories = ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software'];
-            if (!validCategories.includes(category)) {
-                return res.status(400).json({ success: false, message: 'Invalid category' });
-            }
-            product.category = category;
-        }
+        if(name) product.itemName = name;
+        if(price) product.price = Number(price);
+        if(stock) product.stockCount = Number(stock);
+        if(description) product.description = description;
+        if(category) product.category = formatCategory(category); // Normalize on update too
 
         if (req.files && req.files.length > 0) {
             const productId = product._id.toString();
@@ -214,19 +168,15 @@ exports.updateCatalogItem = async (req, res) => {
                 const newFilename = `${productSlug}-${productId}-${index + 1}${ext}`;
                 const targetPath = path.join(targetDir, newFilename);
                 fs.renameSync(file.path, targetPath);
-                
-                // FIX 2 REPEATED: Force Forward Slashes
                 newImagePaths.push(`uploads/products/${productId}/${newFilename}`);
             });
-
             product.images = newImagePaths;
         }
 
         await product.save();
-        notifyClients(req, 'PRODUCT_UPDATE', `Product Updated: ${product.itemName}`);
+        notifyClients(req, 'PRODUCT_UPDATE', `Updated: ${product.itemName}`);
         res.status(200).json({ success: true, data: product });
     } catch (err) {
-        if (req.files) req.files.forEach(f => { if (fs.existsSync(f.path)) fs.unlinkSync(f.path); });
         res.status(500).json({ success: false, message: err.message });
     }
 };
@@ -234,21 +184,6 @@ exports.updateCatalogItem = async (req, res) => {
 exports.createProductReview = async (req, res) => {
     try {
         const { rating, comment } = req.body;
-        
-        // Input validation
-        if (!rating || !comment) {
-            return res.status(400).json({ success: false, message: 'Rating and comment are required' });
-        }
-        
-        const ratingNum = Number(rating);
-        if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
-            return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
-        }
-        
-        if (comment.trim().length < 5) {
-            return res.status(400).json({ success: false, message: 'Comment must be at least 5 characters' });
-        }
-        
         const product = await Product.findById(req.params.id);
         if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
 
@@ -257,8 +192,8 @@ exports.createProductReview = async (req, res) => {
 
         const review = {
             name: req.user.fullName,
-            rating: ratingNum,
-            comment: comment.trim(),
+            rating: Number(rating),
+            comment,
             user: req.user._id,
         };
 

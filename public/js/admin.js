@@ -331,6 +331,8 @@ document.getElementById('add-product-btn').onclick = () => {
     
     // Reset the form (This clears the file input text)
     document.getElementById('add-product-form').reset();
+    document.getElementById('product-modal').style.display = 'block';
+    populateCategoryDatalist(); // check !!!!!!!!!!!!!!!!!!!!
     
     // Explicitly clear file input value just in case
     const fileInput = document.querySelector('input[name="image"]');
@@ -357,6 +359,7 @@ window.openEditProductModal = (id) => {
     document.getElementById('add-product-form').reset();
 
     document.getElementById('product-modal').style.display = 'block';
+    
     document.getElementById('product-modal-title').innerText = "Edit Product";
     document.getElementById('edit-product-id').value = product._id;
     document.getElementById('btn-delete-product').style.display = 'block'; // Show Delete
@@ -387,6 +390,8 @@ window.openEditProductModal = (id) => {
         previewBox.style.display = 'block';
     }
     // ---------------------------
+    
+    populateCategoryDatalist();
 
     // Fill Text Fields
     document.getElementById('p-name').value = product.itemName;
@@ -858,7 +863,7 @@ window.exportCSV = async (type) => {
     }
 };
 
-// Inside public/js/admin.js
+
 
 async function loadPosAdmin(silent) {
     try {
@@ -912,4 +917,17 @@ async function loadPosAdmin(silent) {
     } catch (err) {
         console.error("POS Admin Load Error:", err);
     }
+}
+
+
+async function populateCategoryDatalist() {
+    try {
+        const res = await fetch('/api/products/categories');
+        const result = await res.json();
+        const dataList = document.getElementById('category-list');
+        
+        if(dataList && result.success) {
+            dataList.innerHTML = result.data.map(c => `<option value="${c}">`).join('');
+        }
+    } catch (err) { console.error(err); }
 }

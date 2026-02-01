@@ -31,23 +31,18 @@
           <p class="muted">Tap a pill to narrow the grid.</p>
         </div>
 
+        <!-- In the sidebar filter section of shop.html -->
         <div class="filter-options">
             <div style="margin-bottom: 1rem;">
                 <input type="text" id="search-input" class="form-control" placeholder="Search products..." style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">
             </div>
 
-            <!-- Radio Buttons for Category -->
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="All" checked /><span>All</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="GPU" /><span>GPU</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="CPU" /><span>CPU</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Motherboard" /><span>Motherboard</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="RAM" /><span>RAM</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Storage" /><span>Storage</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Laptop" /><span>Laptop</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Monitor" /><span>Monitor</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Peripheral" /><span>Peripheral</span></label>
-            <label class="pill-option"><input type="radio" name="cat" class="cat-filter" value="Console" /><span>Console</span></label>
-            
+            <!-- DYNAMIC CATEGORY CONTAINER -->
+            <div id="dynamic-categories">
+                <!-- JS will populate radio buttons here -->
+                <p class="muted" style="font-size:0.8rem;">Loading categories...</p>
+            </div>
+    
             <button onclick="applyFilters()" class="btn-primary" style="margin-top: 1rem; width: 100%;">Apply Filters</button>
         </div>
       </aside>

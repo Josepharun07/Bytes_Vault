@@ -1,4 +1,3 @@
-// models/Product.js
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
@@ -14,23 +13,19 @@ const productSchema = new mongoose.Schema({
     sku: { type: String, required: true, unique: true, uppercase: true },
     price: { type: Number, required: true, min: 0 },
     stockCount: { type: Number, required: true, min: 0, default: 0 },
+    
+    // CHANGED: Removed 'enum'. Added trim.
     category: { 
         type: String, 
         required: true,
-        enum: ['GPU', 'CPU', 'Laptop', 'Console', 'Peripheral', 'Storage', 'Monitor', 'Motherboard', 'RAM', 'Power Supply', 'Case', 'Software']
+        trim: true
     },
+    
     description: { type: String, required: true },
-    
-    // FIX: Change default to the online placeholder so it works out of the box
     imageUrl: { type: String, default: 'https://placehold.co/600x400?text=No+Image' },
-    
-    // Dynamic Specs
     specs: { type: Map, of: String },
-    
-    // Images Array (Priority)
     images: { type: [String], default: [] },
     
-    // Reviews
     reviews: [reviewSchema],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },

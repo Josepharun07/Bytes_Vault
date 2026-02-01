@@ -327,17 +327,10 @@
                     </div>
                     <div class="form-group">
                         <label>Category</label>
-                        <select name="category" id="p-category" class="form-control">
-                            <option value="GPU">GPU</option>
-                            <option value="CPU">CPU</option>
-                            <option value="Motherboard">Motherboard</option>
-                            <option value="RAM">RAM</option>
-                            <option value="Storage">Storage</option>
-                            <option value="Laptop">Laptop</option>
-                            <option value="Monitor">Monitor</option>
-                            <option value="Peripheral">Peripheral</option>
-                            <option value="Console">Console</option>
-                        </select>
+                        <input type="text" name="category" id="p-category" class="form-control" list="category-list" placeholder="e.g. GPU" required>
+                        <datalist id="category-list">
+                            <!-- JS will populate this -->
+                        </datalist>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">

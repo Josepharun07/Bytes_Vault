@@ -20,13 +20,48 @@ if (authLink && token) {
 const shopGrid = document.getElementById('shop-grid');
 const featuredGrid = document.getElementById('featured-grid');
 const searchInput = document.getElementById('search-input');
+const categoryContainer = document.getElementById('dynamic-categories');
 
-// --- 3. FETCH PRODUCTS ---
+// --- 3. LOAD CATEGORIES (Dynamic Sidebar) ---
+async function loadCategories() {
+    if(!categoryContainer) return; // Only run on shop page
+
+    try {
+        const res = await fetch('/api/products/categories');
+        const result = await res.json();
+        
+        let html = `
+            <label class="pill-option">
+                <input type="radio" name="cat" class="cat-filter" value="All" checked onchange="applyFilters()">
+                <span>All</span>
+            </label>
+        `;
+
+        if(result.success && result.data) {
+            result.data.forEach(cat => {
+                html += `
+                    <label class="pill-option">
+                        <input type="radio" name="cat" class="cat-filter" value="${cat}" onchange="applyFilters()">
+                        <span>${cat}</span>
+                    </label>
+                `;
+            });
+        }
+        categoryContainer.innerHTML = html;
+    } catch (err) {
+        console.error("Cat Load Error", err);
+    }
+}
+
+// --- 4. FETCH PRODUCTS ---
 async function loadProducts(filters = {}) {
     let url = '/api/products';
     const params = new URLSearchParams();
 
-    if (filters.search) params.append('search', filters.search);
+    // Use value from input if passed, or grab from DOM if not
+    const searchTerm = filters.search !== undefined ? filters.search : (searchInput ? searchInput.value : '');
+    
+    if (searchTerm) params.append('search', searchTerm);
     if (filters.category && filters.category !== 'All') params.append('category', filters.category);
 
     if (params.toString()) url += `?${params.toString()}`;
@@ -44,7 +79,7 @@ async function loadProducts(filters = {}) {
     }
 }
 
-// --- 4. RENDER CARDS (DYNAMIC) ---
+// --- 5. RENDER CARDS ---
 function renderGrid(container, products) {
     container.innerHTML = ''; 
 
@@ -54,24 +89,12 @@ function renderGrid(container, products) {
     }
 
     products.forEach(p => {
-        // FIX: Robust Image Selection Logic
-        let img = 'https://placehold.co/600x400?text=No+Image'; // Fallback
+        let img = 'https://placehold.co/600x400?text=No+Image'; 
+        if (p.images && p.images.length > 0) img = p.images[0];
+        else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') img = p.imageUrl;
 
-        // 1. Check the new Array format (Priority)
-        if (p.images && p.images.length > 0) {
-            img = p.images[0];
-        } 
-        // 2. Check legacy field, but IGNORE the known broken string
-        else if (p.imageUrl && p.imageUrl !== 'uploads/products/no-image.jpg') {
-            img = p.imageUrl;
-        }
-
-        // 3. Fix Local Pathing (Add leading slash if missing)
-        if (!img.startsWith('http') && !img.startsWith('/')) {
-            img = '/' + img;
-        }
+        if (!img.startsWith('http') && !img.startsWith('/')) img = '/' + img;
         
-        // Stock Logic for Badge
         let badgeHtml = '';
         let opacityStyle = '';
 
@@ -79,7 +102,7 @@ function renderGrid(container, products) {
             badgeHtml = '<span class="badge" style="background:#fee2e2; color:#991b1b; position:absolute; top:10px; right:10px;">Out of Stock</span>';
             opacityStyle = 'opacity: 0.7;';
         } else if (p.stockCount < 5) {
-            badgeHtml = `<span class="badge" style="background:#fef3c7; color:#92400e; position:absolute; top:10px; right:10px;">Low Stock: ${p.stockCount}</span>`;
+            badgeHtml = `<span class="badge" style="background:#fef3c7; color:#92400e; position:absolute; top:10px; right:10px;">Low: ${p.stockCount}</span>`;
         }
 
         const card = document.createElement('div');
@@ -93,7 +116,7 @@ function renderGrid(container, products) {
             <div class="card-body">
                 <h3 class="card-title">${p.itemName}</h3>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="card-price">$${p.price}</span>
+                    <span class="card-price">$${p.price.toFixed(2)}</span>
                     <span class="badge" style="background:#f1f5f9; border:1px solid #e2e8f0;">${p.category}</span>
                 </div>
             </div>
@@ -102,21 +125,24 @@ function renderGrid(container, products) {
     });
 }
 
-// --- 5. INITIALIZE ---
-if (shopGrid || featuredGrid) {
+// --- 6. INITIALIZE ---
+if (shopGrid) {
+    loadCategories();
     loadProducts();
+} else if (featuredGrid) {
+    loadProducts(); // Home page doesn't need categories
 }
 
-// --- 6. EVENT LISTENERS ---
+// --- 7. EVENT LISTENERS ---
 window.applyFilters = () => {
-    const search = document.getElementById('search-input').value;
+    const search = searchInput ? searchInput.value : '';
     const selectedCat = document.querySelector('.cat-filter:checked');
     const category = selectedCat ? selectedCat.value : 'All';
     loadProducts({ search, category });
 };
 
-// Listen for "Enter" in search
 if (searchInput) {
+    // Live search with small debounce could be added here, but 'Enter' is fine
     searchInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') applyFilters();
     });
