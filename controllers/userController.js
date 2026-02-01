@@ -57,8 +57,8 @@ exports.updateUserRole = async (req, res) => {
     const { role } = req.body;
 
     // Validate role
-    if (!["customer", "admin"].includes(role)) {
-      return sendError(res, 400, "Invalid role");
+    if (!["customer", "admin", "staff"].includes(role)) {
+      return sendError(res, 400, "Invalid role")
     }
 
     // Find user
@@ -117,8 +117,8 @@ exports.createUser = async (req, res) => {
     }
     
     // Role validation
-    if (!['customer', 'admin'].includes(role)) {
-      return sendError(res, 400, "Invalid role");
+    if (!['customer', 'admin', 'staff'].includes(role)) {
+      return sendError(res, 400, "Invalid role. Allowed: customer, admin, staff");
     }
     
     const hashedPassword = await hashPassword(password);
