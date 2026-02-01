@@ -11,73 +11,71 @@ const notifyClients = (req, type, message) => {
     }
 };
 
-// Replace the existing createOrder function in controllers/orderController.js
-
+// @desc    Create new order (Supports Online & POS)
+// @route   POST /api/orders
 exports.createOrder = async (req, res) => {
     try {
-        const { cartItems, shippingAddress } = req.body;
+        const { cartItems, shippingAddress, source, buyerDetails } = req.body;
         
-        // Input validation
+        // 1. Validate Cart
         if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
             return res.status(400).json({ success: false, message: 'Cart items are required' });
         }
-        
-        if (!shippingAddress) {
-            return res.status(400).json({ success: false, message: 'Shipping address is required' });
-        }
-        
-        // Validate shipping address fields
-        const { fullName, address, city, zip } = shippingAddress;
-        if (!fullName || !address || !city || !zip) {
-            return res.status(400).json({ success: false, message: 'All shipping address fields are required' });
-        }
-        
-        if (fullName.trim().length < 2) {
-            return res.status(400).json({ success: false, message: 'Full name must be at least 2 characters' });
-        }
-        
-        if (address.trim().length < 5) {
-            return res.status(400).json({ success: false, message: 'Address must be at least 5 characters' });
-        }
-        
-        if (city.trim().length < 2) {
-            return res.status(400).json({ success: false, message: 'City must be at least 2 characters' });
-        }
-        
-        if (zip.trim().length < 3) {
-            return res.status(400).json({ success: false, message: 'ZIP code must be at least 3 characters' });
+
+        // 2. Conditional Address Logic (POS vs Online)
+        let finalShippingAddress = shippingAddress;
+
+        if (source === 'POS') {
+            // --- POS LOGIC: Bypass strict address checks ---
+            // Auto-fill defaults if address is missing for walk-in customers
+            finalShippingAddress = {
+                fullName: buyerDetails?.name || 'Walk-in Customer',
+                address: 'In-Store Pickup',
+                city: 'N/A',
+                zip: '00000',
+                country: 'Local',
+                ...shippingAddress // Use provided info if available
+            };
+        } else {
+            // --- ONLINE LOGIC: Enforce strict validation ---
+            if (!shippingAddress) {
+                return res.status(400).json({ success: false, message: 'Shipping address is required' });
+            }
+            
+            const { fullName, address, city, zip } = shippingAddress;
+            if (!fullName || !address || !city || !zip) {
+                return res.status(400).json({ success: false, message: 'All shipping address fields are required' });
+            }
+            
+            if (fullName.trim().length < 2) return res.status(400).json({ success: false, message: 'Full name too short' });
+            if (address.trim().length < 5) return res.status(400).json({ success: false, message: 'Address too short' });
         }
         
         let totalAmount = 0;
         let orderItems = [];
 
-        // 1. Stock Validation (Same as before)
+        // 3. Stock Validation & Deduction
         for (const item of cartItems) {
-            // Validate cart item structure
             if (!item._id || !item.qty) {
                 return res.status(400).json({ success: false, message: 'Invalid cart item format' });
             }
             
-            // Validate quantity
             const qty = Number(item.qty);
-            if (isNaN(qty) || qty < 1 || !Number.isInteger(qty)) {
-                return res.status(400).json({ success: false, message: 'Quantity must be a positive integer' });
+            if (isNaN(qty) || qty < 1) {
+                return res.status(400).json({ success: false, message: 'Quantity must be positive' });
             }
             
             const product = await Product.findById(item._id);
             
-            // Validate Product
             if (!product) {
-                return res.status(404).json({ success: false, message: `Product not found` });
+                return res.status(404).json({ success: false, message: `Product not found: ${item.itemName || 'Unknown Item'}` });
             }
             
-            // Validate Stock
             if (product.stockCount < qty) {
-                // --- FIX 1: Match the test expectation string ---
-                return res.status(400).json({ success: false, message: `Insufficient stock for: ${item.itemName}` });
+                return res.status(400).json({ success: false, message: `Insufficient stock for: ${product.itemName}` });
             }
 
-            // Deduct
+            // Deduct Stock
             product.stockCount -= qty;
             await product.save();
             
@@ -90,37 +88,42 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        // 2. Determine Order Status
-        const orderStatus = (source === 'POS') ? 'Completed' : 'Pending';
+        // 4. Calculate Final Price (Tax 10%)
+        const tax = totalAmount * 0.10;
+        const grandTotal = totalAmount + tax;
+
+        // 5. Determine Status
+        // POS orders are usually completed instantly (handed over)
+        const orderStatus = (source === 'POS') ? 'Delivered' : 'Pending';
         
-        // 3. Create Order
+        // 6. Create Order
         const order = await Order.create({
-            user: req.user.id, // This links the logged-in user (Staff for POS, Customer for Online)
+            user: req.user.id, // Links to the Staff member (if POS) or Customer (if Online)
             items: orderItems,
-            shippingAddress,
-            totalAmount: totalAmount * 1.1,
-            source: source || 'Online',
-            status: orderStatus,
-            // Save the specific buyer info
-            buyerDetails: buyerDetails || { 
-                name: shippingAddress?.fullName || 'Online Customer', 
-                email: '' 
-            }
+            shippingAddress: finalShippingAddress,
+            totalAmount: grandTotal,
+            status: orderStatus
+            // Note: If you added 'source' or 'buyerDetails' to your Mongoose Schema, add them here.
+            // If not, Mongoose will ignore them, but the order still saves correctly.
         });
 
-        // Notify Admin
-        const io = req.app.get('io');
-        if(io) io.emit('data:updated', { type: 'ORDER_NEW', message: `New ${source} Order` });
+        // 7. Notify
+        notifyClients(req, 'ORDER_NEW', `New ${source || 'Online'} Order: $${grandTotal.toFixed(2)}`);
 
-        // Send back the order object + the Staff Name (from req.user) for confirmation
+        // 8. Response
+        // Attach staff name for POS confirmation receipts
         const responseOrder = order.toObject();
-        responseOrder.staffName = req.user.fullName; 
+        if (source === 'POS') responseOrder.processedBy = req.user.fullName; 
 
         res.status(201).json({ success: true, order: responseOrder });
+
     } catch (err) {
+        console.error("Create Order Error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+// ... (Keep getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats exactly as they were) ...
 
 exports.getMyOrders = async (req, res) => {
     try {
@@ -143,25 +146,20 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        
-        // Input validation
-        if (!status) {
-            return res.status(400).json({ success: false, message: 'Status is required' });
-        }
-        
-        // Validate status value
         const validStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
-        if (!validStatuses.includes(status)) {
+
+        if (!status || !validStatuses.includes(status)) {
             return res.status(400).json({ success: false, message: 'Invalid status' });
         }
-        
+
         const order = await Order.findById(req.params.id);
-        if(!order) return res.status(404).json({ success: false, message: 'Order not found' });
-        
+        if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
         order.status = status;
         await order.save();
-        
-        // --- FIX 2: Match the test expectation string ---
+
+        notifyClients(req, 'ORDER_UPDATE', `Order #${order._id.toString().slice(-4)} updated to ${status}`);
+
         res.status(200).json({ success: true, message: 'Order updated', order });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
