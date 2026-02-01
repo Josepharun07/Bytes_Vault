@@ -27,14 +27,13 @@ exports.createOrder = async (req, res) => {
 
         if (source === 'POS') {
             // --- POS LOGIC: Bypass strict address checks ---
-            // Auto-fill defaults if address is missing for walk-in customers
             finalShippingAddress = {
                 fullName: buyerDetails?.name || 'Walk-in Customer',
                 address: 'In-Store Pickup',
                 city: 'N/A',
                 zip: '00000',
                 country: 'Local',
-                ...shippingAddress // Use provided info if available
+                ...shippingAddress 
             };
         } else {
             // --- ONLINE LOGIC: Enforce strict validation ---
@@ -93,25 +92,24 @@ exports.createOrder = async (req, res) => {
         const grandTotal = totalAmount + tax;
 
         // 5. Determine Status
-        // POS orders are usually completed instantly (handed over)
-        const orderStatus = (source === 'POS') ? 'Delivered' : 'Pending';
+        const orderStatus = (source === 'POS') ? 'Completed' : 'Pending'; // Changed from 'Delivered' to 'Completed' to match Schema enum if needed, usually 'Delivered' is fine but check Order.js enum.
         
         // 6. Create Order
         const order = await Order.create({
-            user: req.user.id, // Links to the Staff member (if POS) or Customer (if Online)
+            user: req.user.id,
             items: orderItems,
             shippingAddress: finalShippingAddress,
             totalAmount: grandTotal,
-            status: orderStatus
-            // Note: If you added 'source' or 'buyerDetails' to your Mongoose Schema, add them here.
-            // If not, Mongoose will ignore them, but the order still saves correctly.
+            status: orderStatus,
+            // FIX: Explicitly save source and buyerDetails
+            source: source || 'Online', 
+            buyerDetails: buyerDetails || {}
         });
 
         // 7. Notify
         notifyClients(req, 'ORDER_NEW', `New ${source || 'Online'} Order: $${grandTotal.toFixed(2)}`);
 
         // 8. Response
-        // Attach staff name for POS confirmation receipts
         const responseOrder = order.toObject();
         if (source === 'POS') responseOrder.processedBy = req.user.fullName; 
 
@@ -122,8 +120,6 @@ exports.createOrder = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
-
-// ... (Keep getMyOrders, getAllOrders, updateOrderStatus, getDashboardStats exactly as they were) ...
 
 exports.getMyOrders = async (req, res) => {
     try {
@@ -146,7 +142,7 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
-        const validStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
+        const validStatuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled', 'Completed'];
 
         if (!status || !validStatuses.includes(status)) {
             return res.status(400).json({ success: false, message: 'Invalid status' });
