@@ -17,109 +17,65 @@ exports.createOrder = async (req, res) => {
     try {
         const { cartItems, shippingAddress, source, buyerDetails } = req.body;
         
-        // 1. Validate Cart
-        if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
-            return res.status(400).json({ success: false, message: 'Cart items are required' });
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(400).json({ success: false, message: 'Cart empty' });
         }
 
-        // 2. Conditional Address Logic (POS vs Online)
-        let finalShippingAddress = shippingAddress;
-
+        // Logic: POS vs Online Address
+        let finalAddress = shippingAddress;
         if (source === 'POS') {
-            // --- POS LOGIC: Bypass strict address checks ---
-            finalShippingAddress = {
-                fullName: buyerDetails?.name || 'Walk-in Customer',
-                address: 'In-Store Pickup',
-                city: 'N/A',
+            finalAddress = {
+                fullName: buyerDetails?.name || 'Walk-in',
+                address: 'In-Store',
+                city: 'Local',
                 zip: '00000',
-                country: 'Local',
-                ...shippingAddress 
+                ...shippingAddress
             };
         } else {
-            // --- ONLINE LOGIC: Enforce strict validation ---
-            if (!shippingAddress) {
-                return res.status(400).json({ success: false, message: 'Shipping address is required' });
-            }
-            
-            const { fullName, address, city, zip } = shippingAddress;
-            if (!fullName || !address || !city || !zip) {
-                return res.status(400).json({ success: false, message: 'All shipping address fields are required' });
-            }
-            
-            if (fullName.trim().length < 2) return res.status(400).json({ success: false, message: 'Full name too short' });
-            if (address.trim().length < 5) return res.status(400).json({ success: false, message: 'Address too short' });
+            if (!shippingAddress?.address) return res.status(400).json({ success: false, message: 'Address required' });
         }
-        
+
         let totalAmount = 0;
         let orderItems = [];
 
-        // 3. Stock Validation & Deduction
+        // Stock Deduction
         for (const item of cartItems) {
-            if (!item._id || !item.qty) {
-                return res.status(400).json({ success: false, message: 'Invalid cart item format' });
-            }
-            
-            const qty = Number(item.qty);
-            if (isNaN(qty) || qty < 1) {
-                return res.status(400).json({ success: false, message: 'Quantity must be positive' });
-            }
-            
             const product = await Product.findById(item._id);
-            
-            if (!product) {
-                return res.status(404).json({ success: false, message: `Product not found: ${item.itemName || 'Unknown Item'}` });
-            }
-            
-            if (product.stockCount < qty) {
-                return res.status(400).json({ success: false, message: `Insufficient stock for: ${product.itemName}` });
-            }
+            if (!product) return res.status(404).json({ success: false, message: `Product not found: ${item.itemName}` });
+            if (product.stockCount < item.qty) return res.status(400).json({ success: false, message: `Insufficient stock: ${item.itemName}` });
 
-            // Deduct Stock
-            product.stockCount -= qty;
+            product.stockCount -= item.qty;
             await product.save();
             
-            totalAmount += product.price * qty;
+            totalAmount += product.price * item.qty;
             orderItems.push({
                 product: product._id,
                 itemName: product.itemName,
                 price: product.price,
-                qty: qty
+                qty: item.qty
             });
         }
 
-        // 4. Calculate Final Price (Tax 10%)
-        const tax = totalAmount * 0.10;
-        const grandTotal = totalAmount + tax;
-
-        // 5. Determine Status
-        const orderStatus = (source === 'POS') ? 'Completed' : 'Pending'; // Changed from 'Delivered' to 'Completed' to match Schema enum if needed, usually 'Delivered' is fine but check Order.js enum.
-        
-        // 6. Create Order
+        // Create
+        const orderStatus = source === 'POS' ? 'Completed' : 'Pending';
         const order = await Order.create({
             user: req.user.id,
             items: orderItems,
-            shippingAddress: finalShippingAddress,
-            totalAmount: grandTotal,
+            shippingAddress: finalAddress,
+            totalAmount: totalAmount * 1.1, // Tax
             status: orderStatus,
-            // FIX: Explicitly save source and buyerDetails
-            source: source || 'Online', 
-            buyerDetails: buyerDetails || {}
+            source: source || 'Online',
+            buyerDetails
         });
 
-        // 7. Notify
-        notifyClients(req, 'ORDER_NEW', `New ${source || 'Online'} Order: $${grandTotal.toFixed(2)}`);
-
-        // 8. Response
-        const responseOrder = order.toObject();
-        if (source === 'POS') responseOrder.processedBy = req.user.fullName; 
-
-        res.status(201).json({ success: true, order: responseOrder });
+        notifyClients(req, 'ORDER_NEW', `New Order ($${order.totalAmount.toFixed(2)})`);
+        res.status(201).json({ success: true, order });
 
     } catch (err) {
-        console.error("Create Order Error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
 
 exports.getMyOrders = async (req, res) => {
     try {

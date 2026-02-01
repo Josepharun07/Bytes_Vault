@@ -1,126 +1,82 @@
-// controllers/productController.js
 const Product = require('../models/Product');
 const fs = require('fs');
 const path = require('path');
 
 const notifyClients = (req, type, message) => {
     const io = req.app.get('io');
-    if(io) io.emit('data:updated', { type, message, timestamp: new Date() });
+    if(io) io.emit('data:updated', { type, message });
 };
 
-const slugify = (text) => {
-    return text.toString().toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^\w\-]+/g, '')
-        .replace(/\-\-+/g, '-')
-        .replace(/^-+/, '')
-        .replace(/-+$/, '');
-};
+const slugify = (text) => text.toLowerCase().replace(/[^\w]+/g, '-');
 
-// Helper: Normalize Category (Title Case)
-const formatCategory = (cat) => {
-    return cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase();
-};
-
-// @desc    Get All Unique Categories
-exports.getCategories = async (req, res) => {
-    try {
-        const categories = await Product.distinct('category');
-        res.status(200).json({ success: true, data: categories.sort() });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
-};
-
-// @desc    Add new product
 exports.createCatalogItem = async (req, res) => {
     let createdProduct = null;
     try {
         const { name, sku, price, stock, category, description, specs } = req.body;
         
-        // Input validation
-        if (!name || !sku || !category || !description) {
-            return res.status(400).json({ success: false, message: 'Required fields missing' });
-        }
-        
-        let parsedSpecs = specs;
-        if (typeof specs === 'string') {
-            try { parsedSpecs = JSON.parse(specs); } catch (e) { parsedSpecs = {}; }
-        }
-
-        // Store Category in uniform format (e.g., "Laptop", not "laptop")
-        const formattedCategory = formatCategory(category);
+        let parsedSpecs = {};
+        try { parsedSpecs = JSON.parse(specs); } catch(e) {}
 
         createdProduct = await Product.create({
-            itemName: name.trim(),
-            sku: sku.trim().toUpperCase(),
-            price: Number(price),
-            stockCount: Number(stock),
-            category: formattedCategory,
-            description: description.trim(),
-            images: ['https://placehold.co/600x400?text=No+Image'], 
-            specs: parsedSpecs
+            itemName: name,
+            sku,
+            price,
+            stockCount: stock,
+            category,
+            description,
+            specs: parsedSpecs,
+            images: ['uploads/products/no-image.jpg']
         });
 
-        // Image Handling (Same as before)
-        const imagePaths = [];
         if (req.files && req.files.length > 0) {
             const productId = createdProduct._id.toString();
-            const productSlug = slugify(name);
             const targetDir = path.join(__dirname, '../public/uploads/products', productId);
-            
             if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
-            req.files.forEach((file, index) => {
+            const imagePaths = req.files.map((file, i) => {
                 const ext = path.extname(file.originalname);
-                const newFilename = `${productSlug}-${productId}-${index + 1}${ext}`;
-                const targetPath = path.join(targetDir, newFilename);
-                fs.renameSync(file.path, targetPath);
-                // Force forward slashes
-                imagePaths.push(`uploads/products/${productId}/${newFilename}`); 
+                const newName = `${slugify(name)}-${productId}-${i}${ext}`;
+                fs.renameSync(file.path, path.join(targetDir, newName));
+                return `uploads/products/${productId}/${newName}`;
             });
 
             createdProduct.images = imagePaths;
+            createdProduct.imageUrl = imagePaths[0];
             await createdProduct.save();
         }
 
-        notifyClients(req, 'PRODUCT_NEW', `New Product: ${name}`);
+        notifyClients(req, 'PRODUCT_NEW', `Added: ${name}`);
         res.status(201).json({ success: true, product: createdProduct });
 
     } catch (err) {
         if(createdProduct) await Product.findByIdAndDelete(createdProduct._id);
-        if (err.code === 11000) return res.status(400).json({ success: false, message: 'SKU exists.' });
         res.status(500).json({ success: false, message: err.message });
     }
 };
 
-// @desc    Get all products (Expanded Search)
 exports.fetchCatalog = async (req, res) => {
     try {
         const { category, search } = req.query;
         let query = {};
-
-        // Filter by Category
-        if (category && category !== 'All') {
-            query.category = category;
-        }
-
-        // Search Logic: Name OR Description OR Category
-        if (search && search.trim() !== '') {
-            const searchRegex = { $regex: search, $options: 'i' };
-            query.$or = [
-                { itemName: searchRegex },
-                { description: searchRegex },
-                { category: searchRegex }
-            ];
-        }
-
+        if(category && category !== 'All') query.category = category;
+        if(search) query.itemName = { $regex: search, $options: 'i' };
+        
         const products = await Product.find(query).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, count: products.length, data: products });
-    } catch (err) {
+        res.status(200).json({ success: true, data: products });
+    } catch(err) {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+exports.getCategories = async (req, res) => {
+    try {
+        const cats = await Product.distinct('category');
+        res.status(200).json({ success: true, data: cats.sort() });
+    } catch(err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 
 exports.removeItem = async (req, res) => {
     try {

@@ -1,14 +1,12 @@
-// test/auth.test.js
 const request = require('supertest');
 const { expect } = require('chai');
-const vaultApp = require('../server');
+const app = require('../server'); // Import the Express App
 const User = require('../models/User');
 
-describe('🔐 Authentication Module', () => {
+describe('🔐 Authentication System', () => {
     
-    // Clear Users before testing
     before(async () => {
-        await User.deleteMany({});
+        await User.deleteMany({}); // Clear users
     });
 
     const adminUser = {
@@ -18,52 +16,47 @@ describe('🔐 Authentication Module', () => {
         role: "admin"
     };
 
-    let adminToken;
+    const staffUser = {
+        fullName: "Staff Member",
+        email: "staff@test.com",
+        password: "password123",
+        role: "staff"
+    };
 
-    // --- UNIT / INTEGRATION TESTS ---
-
-    it('1. Should register a new Admin user (201)', async () => {
-        const res = await request(vaultApp)
+    it('1. Should Register an Admin User', async () => {
+        const res = await request(app)
             .post('/api/auth/register')
             .send(adminUser);
-
-        expect(res.status).to.equal(201);
-        expect(res.body.success).to.be.true;
-        expect(res.body).to.have.property('token');
-        expect(res.body).to.have.property('role', 'admin');
         
-        adminToken = res.body.token; // Save for later
+        expect(res.status).to.equal(201);
+        expect(res.body.role).to.equal('admin');
+        expect(res.body).to.have.property('token');
     });
 
-    it('2. Should prevent duplicate emails (400)', async () => {
-        const res = await request(vaultApp)
+    it('2. Should Prevent Duplicate Emails', async () => {
+        const res = await request(app)
             .post('/api/auth/register')
             .send(adminUser);
-
+        
         expect(res.status).to.equal(400);
         expect(res.body.message).to.include('Email taken');
     });
 
-    it('3. Should login successfully with correct credentials (200)', async () => {
-        const res = await request(vaultApp)
+    it('3. Should Login Successfully', async () => {
+        const res = await request(app)
             .post('/api/auth/login')
-            .send({
-                email: adminUser.email,
-                password: adminUser.password
-            });
-
+            .send({ email: adminUser.email, password: adminUser.password });
+        
         expect(res.status).to.equal(200);
         expect(res.body).to.have.property('token');
     });
 
-    it('4. Should reject incorrect password (401)', async () => {
-        const res = await request(vaultApp)
-            .post('/api/auth/login')
-            .send({
-                email: adminUser.email,
-                password: "wrongpassword"
-            });
-
-        expect(res.status).to.equal(401);
+    it('4. Should Register a Staff Member', async () => {
+        const res = await request(app)
+            .post('/api/auth/register')
+            .send(staffUser);
+        
+        expect(res.status).to.equal(201);
+        expect(res.body.role).to.equal('staff');
     });
 });

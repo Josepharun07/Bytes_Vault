@@ -13,19 +13,16 @@ const productSchema = new mongoose.Schema({
     sku: { type: String, required: true, unique: true, uppercase: true },
     price: { type: Number, required: true, min: 0 },
     stockCount: { type: Number, required: true, min: 0, default: 0 },
-    
-    // CHANGED: Removed 'enum'. Added trim.
-    category: { 
-        type: String, 
-        required: true,
-        trim: true
-    },
-    
+    category: { type: String, required: true, trim: true },
     description: { type: String, required: true },
-    imageUrl: { type: String, default: 'https://placehold.co/600x400?text=No+Image' },
-    specs: { type: Map, of: String },
+    
+    // Images: Primary + Gallery
+    imageUrl: { type: String, default: 'uploads/products/no-image.jpg' },
     images: { type: [String], default: [] },
     
+    specs: { type: Map, of: String },
+    
+    // Reviews
     reviews: [reviewSchema],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
