@@ -213,7 +213,6 @@ Go to your browser:
 *   **Abhishek Ghimire** 
 *   **Jayadhwaj Reddy Mothey** 
 
----
 
 ---
 Bytes Vault Team. Built for SIT725 Applied Software Engineering.
