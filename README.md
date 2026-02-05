@@ -169,17 +169,6 @@ npm test
 | `GET` | `/api/orders/admin/stats` | Admin | Fetch Revenue & Real-time Metrics |
 | `POST` | `/api/users` | Admin | Create Staff/Admin Accounts |
 
----
-
-## 👥 Contributors
-
-*   **Arun Joseph** 
-*   **Farhan Al Rashid** 
-*   **Navya Aila** 
-*   **Abhishek Ghimire** 
-*   **Jayadhwaj Reddy Mothey** 
-
----
 
 
 
@@ -212,6 +201,19 @@ Go to your browser:
 ### Troubleshooting
 *   **Error:** `The system cannot find the file specified` -> Docker Desktop is not running. Start it.
 *   **Error:** `port is already allocated` -> You have `npm run dev` running in another terminal. Stop it (`Ctrl+C`) before running Docker.
+
+
+---
+
+## 👥 Contributors
+
+*   **Arun Joseph** 
+*   **Farhan Al Rashid** 
+*   **Navya Aila** 
+*   **Abhishek Ghimire** 
+*   **Jayadhwaj Reddy Mothey** 
+
+---
 
 ---
 Bytes Vault Team. Built for SIT725 Applied Software Engineering.
