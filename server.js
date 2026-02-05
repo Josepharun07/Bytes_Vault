@@ -80,7 +80,7 @@ app.get('/api/system/status', async (req, res) => {
         activeConnections: io.engine.clientsCount,
         uptime: process.uptime(),
         latency: latency,
-        totalDocuments: totalDocs, // <-- Sends the number here
+        totalDocuments: totalDocs, 
         environment: process.env.NODE_ENV || 'development'
     });
 });
