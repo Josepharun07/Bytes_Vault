@@ -9,6 +9,11 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const initiateDataLayer = require('./config/db');
 
+// --- CRITICAL: Import Models for Stats ---
+const User = require('./models/User');
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -16,15 +21,14 @@ const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 
-// App & Server Setup
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Share 'io' instance with controllers
+// Share 'io' instance
 app.set('io', io);
 
-// 1. Database Connection
+// 1. Database
 initiateDataLayer();
 
 // 2. Middleware
@@ -32,7 +36,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cors());
-// Security: Disable CSP to allow inline scripts in this specific project
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // 3. API Routes
@@ -42,17 +45,33 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// 4. System Health API (Used by Admin Dashboard)
+// 4. System Health & Stats Endpoint (FIXED)
 app.get('/api/system/status', async (req, res) => {
     const isConnected = mongoose.connection.readyState === 1;
     let latency = 0;
-    
+    let totalDocs = 0; // Default to 0
+
     if (isConnected) {
-        const start = Date.now();
         try {
+            // 1. Check Latency
+            const start = Date.now();
             await mongoose.connection.db.admin().ping();
             latency = Date.now() - start;
-        } catch (e) { latency = -1; }
+
+            // 2. Count Documents (Safe Promise.all)
+            const [userCount, prodCount, orderCount] = await Promise.all([
+                User.countDocuments().catch(() => 0),     // If fails, return 0
+                Product.countDocuments().catch(() => 0),  // If fails, return 0
+                Order.countDocuments().catch(() => 0)     // If fails, return 0
+            ]);
+            
+            totalDocs = userCount + prodCount + orderCount;
+
+        } catch (e) {
+            console.error("Stats Error:", e);
+            latency = -1;
+            totalDocs = 0; // Fallback
+        }
     }
 
     res.status(200).json({ 
@@ -61,25 +80,28 @@ app.get('/api/system/status', async (req, res) => {
         activeConnections: io.engine.clientsCount,
         uptime: process.uptime(),
         latency: latency,
+        totalDocuments: totalDocs, // <-- Sends the number here
         environment: process.env.NODE_ENV || 'development'
     });
 });
 
-// 5. Serve Static Files
+// 5. Serve Frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 6. Global Error Handler
 app.use((err, req, res, next) => {
-    console.error("🔥 Server Error:", err.stack);
+    console.error("Server Error:", err.stack);
     res.status(500).json({ success: false, message: err.message || 'Server Error' });
 });
 
 // 7. Start
-const PORT = process.env.PORT || 3000;
+const SYSTEM_PORT = process.env.PORT || 3000;
+const BASE_URL = `http://localhost:${SYSTEM_PORT}`;
+
 if (require.main === module) {
-    server.listen(PORT, () => {
-        console.log(`\n🚀 Bytes Vault Running on Port ${PORT}`);
-        console.log(`🔗 http://localhost:${PORT}`);
+    server.listen(SYSTEM_PORT, () => {
+        console.log(`\n🚀 Bytes Vault Running`);
+        console.log(`🔗 ${BASE_URL}`);
     });
 }
 
