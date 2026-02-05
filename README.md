@@ -129,48 +129,7 @@ You can run Bytes Vault locally or via Docker.
     ```
     *Access the app at `http://localhost:3000`*
 
-### Option B: Docker Setup (Recommended)
-1.  **Build and Run**
-    ```bash
-    docker-compose up --build
-    ```
-2.  **Seed Database (Inside Container)**
-    Open a new terminal and run:
-    ```bash
-    docker exec -it bytes-vault-app npm run seed
-    ```
-    *Access the app at `http://localhost:3000`*
-
----
-
-## 🧪 Testing Strategy
-
-The project includes a robust test suite covering Unit, Integration, and End-to-End scenarios.
-
-**Run All Tests:**
-```bash
-npm test
-```
-
-**Key Test Suites:**
-*   `full_system.test.js`: Simulates a full customer journey (Register -> Login -> Buy -> Admin Check).
-*   `auth.test.js`: Verifies security boundaries and token generation.
-*   `product.test.js`: Verifies CRUD operations and file upload logic.
-
----
-
-## 🛣 API Reference (Snapshot)
-
-| Method | Endpoint | Role | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/login` | Public | Authenticate & Retrieve Token |
-| `GET` | `/api/products` | Public | Fetch Catalog with Search/Filter |
-| `POST` | `/api/orders` | Customer | Place Online Order (Atomic Transaction) |
-| `GET` | `/api/orders/admin/stats` | Admin | Fetch Revenue & Real-time Metrics |
-| `POST` | `/api/users` | Admin | Create Staff/Admin Accounts |
-
----
-
+### Option B: Docker Setup
 
 ###  How to Run It
 
@@ -202,6 +161,33 @@ Go to your browser:
 *   **Error:** `The system cannot find the file specified` -> Docker Desktop is not running. Start it.
 *   **Error:** `port is already allocated` -> You have `npm run dev` running in another terminal. Stop it (`Ctrl+C`) before running Docker.
 
+---
+
+## 🧪 Testing Strategy
+
+The project includes a robust test suite covering Unit, Integration, and End-to-End scenarios.
+
+**Run All Tests:**
+```bash
+npm test
+```
+
+**Key Test Suites:**
+*   `full_system.test.js`: Simulates a full customer journey (Register -> Login -> Buy -> Admin Check).
+*   `auth.test.js`: Verifies security boundaries and token generation.
+*   `product.test.js`: Verifies CRUD operations and file upload logic.
+
+---
+
+## 🛣 API Reference (Snapshot)
+
+| Method | Endpoint | Role | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Public | Authenticate & Retrieve Token |
+| `GET` | `/api/products` | Public | Fetch Catalog with Search/Filter |
+| `POST` | `/api/orders` | Customer | Place Online Order (Atomic Transaction) |
+| `GET` | `/api/orders/admin/stats` | Admin | Fetch Revenue & Real-time Metrics |
+| `POST` | `/api/users` | Admin | Create Staff/Admin Accounts |
 
 ---
 
