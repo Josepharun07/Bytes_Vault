@@ -180,5 +180,41 @@ npm test
 *   **Jayadhwaj Reddy Mothey** 
 
 ---
-Bytes Vault Team. Built for SIT725 Applied Software Engineering.*
+Bytes Vault Team. Built for SIT725 Applied Software Engineering.
+```
+
+```
+
+
+###  How to Run It
+
+#### 1. Start Docker Desktop
+Make sure the **Docker Desktop** application is open and the icon is Green/Running.
+
+#### 2. Build and Launch
+Open your VS Code terminal and run:
+```bash
+docker-compose up --build
+```
+*   It will download MongoDB and Node.js (this takes time the first time).
+*   Wait until you see: `Connected to MongoDB` in the logs.
+
+#### 3. Seed the Database
+Since this is a brand new Docker database, it is **empty**. You need to run your seeder script *inside* the container.
+
+Open a **second terminal** and run:
+```bash
+docker exec -it bytes-vault-app npm run seed
+```
+*   You should see: `✅ SYSTEM RESET SUCCESSFUL`.
+
+#### 4. Access the App
+Go to your browser:
+`http://localhost:3000`
+
+### Troubleshooting
+*   **Error:** `The system cannot find the file specified` -> Docker Desktop is not running. Start it.
+*   **Error:** `port is already allocated` -> You have `npm run dev` running in another terminal. Stop it (`Ctrl+C`) before running Docker.
+
+
 ```

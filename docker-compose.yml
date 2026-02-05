@@ -1,0 +1,31 @@
+services:
+
+  mongo:
+    image: mongo:6.0
+    container_name: bytes-vault-db
+    restart: always
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo-data:/data/db 
+
+  
+  app:
+    build: .
+    container_name: bytes-vault-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - JWT_SECRET=docker_secret_key_123
+      - MONGO_URI=mongodb://mongo:27017/bytes_vault
+    depends_on:
+      - mongo 
+    links:
+      - mongo
+
+# Define storage volume
+volumes:
+  mongo-data:
