@@ -180,10 +180,7 @@ npm test
 *   **Jayadhwaj Reddy Mothey** 
 
 ---
-Bytes Vault Team. Built for SIT725 Applied Software Engineering.
-```
 
-```
 
 
 ###  How to Run It
@@ -216,5 +213,6 @@ Go to your browser:
 *   **Error:** `The system cannot find the file specified` -> Docker Desktop is not running. Start it.
 *   **Error:** `port is already allocated` -> You have `npm run dev` running in another terminal. Stop it (`Ctrl+C`) before running Docker.
 
-
-```
+---
+Bytes Vault Team. Built for SIT725 Applied Software Engineering.
+---
